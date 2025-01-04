@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: darkred;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 1rem;
+            background-color: darkred;
+            color: white;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .box {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            color: white;
+        }
+
+        .box button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .box button:hover {
+            background-color: darkred;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: darkred;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>¿Qué quieres calcular hoy?</h1>
+    </header>
+    <main>
+        <div class="box">
+            <button onclick="location.href='volfinal.html'">Volumen Final</button>
+            <button onclick="location.href='calcularhora.html'">Horas</button>
+        </div>
+    </main>
+    <footer>
+        <p>Sitio web hecho por Adonay 👻</p>
+    </footer>
+</body>
+</html>

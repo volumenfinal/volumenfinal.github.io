@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de jarabe terminado.</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: darkred;
+            color: white;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[readonly] {
+            background-color: #f0f0f0;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Volumen Final</h1>
+    <form id="calculatorForm">
+        <div class="form-group">
+            <label for="abbreviation">Sabor:</label>
+            <input type="text" id="abbreviation" required>
+        </div>
+        <div class="form-group">
+            <label for="fullName"></label>
+            <input type="text" id="fullName" readonly>
+        </div>
+        <div class="form-group">
+            <label for="quantity">Litros:</label>
+            <input type="number" id="quantity" readonly>
+        </div>
+        <div class="form-group">
+            <label for="userQuantity">Unidad:</label>
+            <input type="number" id="userQuantity" required>
+        </div>
+        <div class="form-group">
+            <label for="additionalInfo">Brix Final:</label>
+            <input type="text" id="additionalInfo" readonly>
+        </div>
+        <div class="form-group">
+            <label for="result">Volumen Final:</label>
+            <input type="text" id="result" readonly>
+        </div>
+        <div class="form-group">
+            <label for="realVolume">Volumen Real:</label>
+            <input type="number" id="realVolume">
+        </div>
+        <div class="form-group">
+            <label for="margin">Margen:</label>
+            <input type="number" id="margin">
+        </div>
+        <div class="form-group">
+            <label for="waterVolume">Volumen de Agua:</label>
+            <input type="text" id="waterVolume" readonly>
+        </div>
+    </form>
+
+    <footer>
+       App hecha por Adonay 👻
+    </footer>
+
+    <script>
+        const database = {
+            'CCF': { name: 'Coca-Cola Familiar', quantity: 300, info: '41.07' },
+            'CC': { name: 'Coca-Cola Clásica', quantity: 300, info: '54.85' },
+            'JDVC': { name: 'Jugo del valle citru Naranja', quantity: 438.16, info: '20.13' },
+            'FRKH': { name: 'Fresca Harmony', quantity: 312.70, info: '41.85' },
+            'UVAH': { name: 'Uva Harmony', quantity: 345, info: '37.56' },
+            'FSAH': { name: 'Fresa Harmony', quantity: 359.9, info: '36.11' },
+            'CSH': { name: 'Crema Soda Harmony', quantity: 359.9, info: '36.06' },
+            'FNH': { name: 'Fanta Naranja Harmony', quantity: 370.6, info: '44.26' },
+            'JDVM': { name: 'Jugo del valle Mandarina', quantity: 500.3, info: '40.05' },
+            'FP': { name: 'Fanta Piña', quantity: 370.43, info: '23.09' },
+            'SP': { name: 'Sprite Fenix', quantity: 312.57, info: '28.96' },
+            'PMB': { name: 'Powerade Mountain Blast', quantity: 811.82, info: '15.88' },
+            'PFI4': { name: 'Powerade Frutas Ion 4', quantity: 811.91, info: '21.76' },
+            'CCZ': { name: 'Coca-Cola Zero', quantity: 304.7, info: '0' },
+            'CCZB': { name: 'Coca-Cola Zero B&B', quantity: 304.7, info: '0' },
+            'KL': { name: 'Kinley Soda', quantity: 312.5, info: '0' },
+            'FTM': { name: 'Fuze Tea Melocotón', quantity: 500.1, info: '23.48' },
+            'FTL': { name: 'Fuze Tea Limón', quantity: 500.1, info: '23.46' },
+            'FTLB': { name: 'Fuze Tea Limón B&B', quantity: 285.8, info: '38.22' },
+            'JDVN': { name: 'Jugo del valle Naranja', quantity: 1378.4, info: '27.49' },
+            'PNI4': { name: 'Powerade Naranja Mandarina Ion 4', quantity: 811.90, info: '21.75' },
+            'FURYG': { name: 'Fury Gold', quantity: 500, info: '40.7' },
+            'FURYM': { name: 'Fury Mean Green', quantity: 500, info: '39.6' },
+            'SWMZ': { name: 'Cristal Manzana', quantity: 370.4, info: '0' },
+            'SWMA': { name: 'Cristal Mandarina', quantity: 500, info: '0' },
+            'JDVG': { name: 'Jugo del valle Guayaba', quantity: 559.18, info: '37.35' },
+        };
+
+        document.getElementById('abbreviation').addEventListener('blur', function() {
+            const abbr = this.value.toUpperCase();
+            const data = database[abbr];
+            if (data) {
+                document.getElementById('fullName').value = data.name;
+                document.getElementById('quantity').value = data.quantity;
+                document.getElementById('additionalInfo').value = data.info;
+                calculateFinalVolume();
+            } else {
+                alert('Abreviatura no encontrada');
+                document.getElementById('fullName').value = '';
+                document.getElementById('quantity').value = '';
+                document.getElementById('additionalInfo').value = '';
+                document.getElementById('result').value = '';
+                document.getElementById('waterVolume').value = '';
+            }
+        });
+
+        document.getElementById('userQuantity').addEventListener('input', calculateFinalVolume);
+        document.getElementById('realVolume').addEventListener('input', calculateWaterVolume);
+        document.getElementById('margin').addEventListener('input', calculateWaterVolume);
+
+        function calculateFinalVolume() {
+            const quantity = parseFloat(document.getElementById('quantity').value);
+            const userQuantity = parseFloat(document.getElementById('userQuantity').value);
+
+            if (!isNaN(quantity) && !isNaN(userQuantity)) {
+                const finalVolume = Math.round(quantity * userQuantity);
+                document.getElementById('result').value = finalVolume;
+                calculateWaterVolume();
+            }
+        }
+
+        function calculateWaterVolume() {
+            const finalVolume = parseInt(document.getElementById('result').value, 10);
+            const realVolume = parseInt(document.getElementById('realVolume').value, 10);
+            const margin = parseInt(document.getElementById('margin').value, 10);
+
+            if (!isNaN(finalVolume) && !isNaN(realVolume) && !isNaN(margin)) {
+                const waterVolume = finalVolume - realVolume - margin;
+                document.getElementById('waterVolume').value = waterVolume;
+            }
+        }
+    </script>
+</body>
+</html>

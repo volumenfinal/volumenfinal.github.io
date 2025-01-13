@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Sabor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: darkred;
+            min-height: 100vh;
+        }
+        header {
+            background-color: darkred;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        form {
+            background: #f9f9f9;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[readonly] {
+            background-color: #e9ecef;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        footer {
+            background-color: darkred;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: auto;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const litrosPorSabor = {
+                "CCF": 300,
+                "CC": 300,
+                "JDVM": 500.3,
+                "JDVC": 438.16,
+                "FRKH": 312.70,
+                "UVAH": 345,
+                "FSAH": 359.9,
+                "CSH": 359.9,
+                "FNH": 370.6,
+                "FP": 370.43,
+                "SP": 312.57,
+                "PMB": 811.82,
+                "PFI4": 811.91,
+                "CCZ": 304.7,
+                "CCZB": 304.7,
+                "KL": 312.5,
+                "FTM": 500.1,
+                "FTL": 500.1,
+                "FTLB": 285.8,
+                "JDVN": 1378.4,
+                "PNI4": 811.90,
+                "FURYG": 500,
+                "FURYM": 500,
+                "SWMZ": 370.4,
+                "SWMA": 500,
+                "JDVG": 559.18,
+            };
+
+            function calcularTotal() {
+                const volumenInicial = parseFloat(document.getElementById('volumenInicial').value) || 0;
+                const volumenFinal = parseFloat(document.getElementById('volumenFinal').value) || 0;
+                const litros = parseFloat(document.getElementById('litros').value) || 1;
+
+                let total = 0;
+                if (volumenInicial && volumenFinal) {
+                    total = (volumenInicial - volumenFinal) / litros;
+                } else if (volumenInicial) {
+                    total = volumenInicial / litros;
+                } else if (volumenFinal) {
+                    total = volumenFinal / litros;
+                }
+
+                document.getElementById('total').value = isNaN(total) ? 0 : total.toFixed(2);
+            }
+
+            function actualizarLitros() {
+                const sabor = document.getElementById('sabor').value.toUpperCase();
+                const litros = litrosPorSabor[sabor] || 0;
+                document.getElementById('litros').value = litros;
+                calcularTotal();
+            }
+
+            document.getElementById('sabor').addEventListener('input', actualizarLitros);
+            document.getElementById('volumenInicial').addEventListener('input', calcularTotal);
+            document.getElementById('volumenFinal').addEventListener('input', calcularTotal);
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Calcular Unidades</h1>
+    </header>
+    <main>
+        <form>
+            <label for="sabor">Sabor:</label>
+            <input type="text" id="sabor" placeholder="Ingresa el sabor" required>
+
+            <label for="volumenInicial">Volumen Inicial:</label>
+            <input type="number" id="volumenInicial" required>
+
+            <label for="volumenFinal">Volumen Final:</label>
+            <input type="number" id="volumenFinal" required>
+
+            <label for="litros">Litros:</label>
+            <input type="number" id="litros" value="" readonly>
+
+            <label for="total">Unidades:</label>
+            <input type="text" id="total" readonly>
+        </form>
+    </main>
+    <footer>
+        <p>App hecha por Adonay 👻</p>
+    </footer>
+</body>
+</html>

@@ -17,16 +17,7 @@
             background-color: darkred;
         }
 
-        h1 {
-            margin-top: 20px;
-            font-size: 2em;
-            color: white;
-            text-align: center;
-        }
-
-        h2 {
-            margin-top: 20px;
-            font-size: 2em;
+        h1, h2 {
             color: white;
             text-align: center;
         }
@@ -38,10 +29,9 @@
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             background-color: white;
             text-align: center;
-            overflow-x: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .form-group {
@@ -54,7 +44,7 @@
             font-weight: bold;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
@@ -62,10 +52,15 @@
             border-radius: 4px;
         }
 
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto; /* Permite scroll horizontal si es necesario */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            font-size: 14px;
         }
 
         table, th, td {
@@ -77,6 +72,10 @@
             text-align: center;
         }
 
+        th {
+            background-color: #f2f2f2;
+        }
+
         footer {
             padding: 10px;
             width: 100%;
@@ -85,38 +84,58 @@
             color: white;
         }
 
-        @media (max-width: 768px) {
+        /* Media Queries for Small Devices */
+        @media (max-width: 600px) {
+            h1, h2 {
+                font-size: 1.5em;
+            }
+
+            table, th, td {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 6px;
+            }
+
             .container {
                 padding: 15px;
             }
 
-            table {
-                font-size: 0.8em;
-            }
-
-            th, td {
-                padding: 5px;
+            input, select {
+                padding: 6px;
+                font-size: 14px;
             }
         }
 
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.5em;
+        /* Media Queries for Very Small Devices */
+        @media (max-width: 400px) {
+            h1, h2 {
+                font-size: 1.2em;
             }
 
             table {
-                font-size: 0.7em;
+                font-size: 11px;
             }
 
             th, td {
                 padding: 4px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            input, select {
+                padding: 5px;
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
     <h1>Tiempo Total 🐟</h1>
-    <h2>Solo agrega el sabor y la hora final y deja que nosotros hagamos el resto</h2>
+    <h2>Solo agrega el sabor, selecciona cuanto tiempo le quieres dar y coloca la hora final.</h2>
     <div class="container">
         <div class="form-group">
             <label for="abbreviation">Sabor:</label>
@@ -125,41 +144,55 @@
         </div>
 
         <div class="form-group">
+            <label for="hours">Selecciona las horas:</label>
+            <select id="hours">
+                <option value="1">1 hora</option>
+                <option value="2">2 horas</option>
+                <option value="3">3 horas</option>
+                <option value="4">4 horas</option>
+            </select>
+        </div>
+
+        <div class="form-group">
             <label for="end-time">Hora final:</label>
             <input type="time" id="end-time">
         </div>
-        <table id="time-table">
-            <thead>
-                <tr>
-                    <th>Inicio de la preparación</th>
-                    <th>Inicio en dilución</th>
-                    <th>Final en dilución</th>
-                    <th>Agitación inicial</th>
-                    <th>Agitación final</th>
-                    <th>Total Agitación</th>
-                    <th>Reposo inicial</th>
-                    <th>Reposo final</th>
-                    <th>Total Reposo</th>
-                    <th>Final de la preparación</th>
-                    <th>Tiempo Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td id="prep-start"></td>
-                    <td id="dil-start"></td>
-                    <td id="dil-end"></td>
-                    <td id="agit-start"></td>
-                    <td id="agit-end"></td>
-                    <td id="agit-total"></td>
-                    <td id="rest-start"></td>
-                    <td id="rest-end"></td>
-                    <td id="rest-total"></td>
-                    <td id="prep-end"></td>
-                    <td id="total-time"></td>
-                </tr>
-            </tbody>
-        </table>
+
+        <!-- Tabla dentro del contenedor -->
+        <div class="table-container">
+            <table id="time-table">
+                <thead>
+                    <tr>
+                        <th>Inicio de la preparación</th>
+                        <th>Inicio en dilución</th>
+                        <th>Final en dilución</th>
+                        <th>Agitación inicial</th>
+                        <th>Agitación final</th>
+                        <th>Total Agitación</th>
+                        <th>Reposo inicial</th>
+                        <th>Reposo final</th>
+                        <th>Total Reposo</th>
+                        <th>Final de la preparación</th>
+                        <th>Tiempo Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="prep-start"></td>
+                        <td id="dil-start"></td>
+                        <td id="dil-end"></td>
+                        <td id="agit-start"></td>
+                        <td id="agit-end"></td>
+                        <td id="agit-total"></td>
+                        <td id="rest-start"></td>
+                        <td id="rest-end"></td>
+                        <td id="rest-total"></td>
+                        <td id="prep-end"></td>
+                        <td id="total-time"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <footer>
@@ -168,49 +201,51 @@
 
     <script>
         const abbreviationMessages = {
-           "CCF": { "message": "Coca-Cola Familiar lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "CC": { "message": "Coca-Cola Clásica lleva 30 minutos (0.5) de reposo ", "restTime": 30, "duration": 2 },
-    "FNH": { "message": "Fanta Naranja Harmony lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "CCZ": { "message": "Coca-Cola Zero lleva 30 minutos (0.5) de reposo ", "restTime": 30, "duration": 3 },
-    "CCZB": { "message": "Coca-Cola Zero B&B lleva 30 minutos (0.5) de reposo ", "restTime": 30, "duration": 3 },
-    "FRKH": { "message": "Fresca Harmony lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "KL": { "message": "Kinley lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "UVAH": { "message": "Uva Harmony lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "CSH": { "message": "Crema Soda Harmony lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "FSAH": { "message": "Fresa Harmony lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "FTM": { "message": "Fuze Tea Melocotón lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "FTL": { "message": "Fuze Tea Limón lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "FTLB": { "message": "Fuze Tea Limón B&B lleva 1 hora de reposo ", "restTime": 60, "duration": 3 },
-    "JDVM": { "message": "Jugo Del Valle Mandarina no lleva reposo ", "restTime": 0, "duration": 4 },
-    "JDVC": { "message": "Jugo Del Valle Citrus lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "JDVG": { "message": "Jugo Del Valle Guayaba lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "PFI4": { "message": "Powerade Frutas Ion 4 no lleva reposo ", "restTime": 0, "duration": 4 },
-    "PNI4": { "message": "Powerade Naranja Mandarina Ion 4 no lleva reposo ", "restTime": 0, "duration": 3 },
-    "PMB": { "message": "Powerade Mountain Blast no lleva reposo ", "restTime": 0, "duration": 4 },
-    "FURYG": { "message": "Fury Gold no lleva reposo ", "restTime": 0, "duration": 3 },
-    "FURYM": { "message": "Fury Mean Green no lleva reposo ", "restTime": 0, "duration": 3 },
-    "SWMZ": { "message": "Cristal Manzana lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "SWMA": { "message": "Cristal Mandarina lleva 1 hora de reposo ", "restTime": 60, "duration": 2 },
-    "SPF": { "message": "Sprite Fenix lleva 1 hora de reposo ", "restTime": 60, "duration": 2 }
-        };
+    "CCF": { "message": "Coca-Cola Familiar lleva 1 hora de reposo ", "restTime": 60 },
+    "CC": { "message": "Coca-Cola Clásica lleva 30 minutos (0.5) de reposo ", "restTime": 30 },
+    "FNH": { "message": "Fanta Naranja Harmony lleva 1 hora de reposo ", "restTime": 60 },
+    "CCZ": { "message": "Coca-Cola Zero lleva 30 minutos (0.5) de reposo ", "restTime": 30 },
+    "CCZB": { "message": "Coca-Cola Zero B&B lleva 30 minutos (0.5) de reposo ", "restTime": 30 },
+    "FRKH": { "message": "Fresca Harmony lleva 1 hora de reposo ", "restTime": 60 },
+    "KL": { "message": "Kinley lleva 1 hora de reposo ", "restTime": 60 },
+    "UVAH": { "message": "Uva Harmony lleva 1 hora de reposo ", "restTime": 60 },
+    "CSH": { "message": "Crema Soda Harmony lleva 1 hora de reposo ", "restTime": 60 },
+    "FSAH": { "message": "Fresa Harmony lleva 1 hora de reposo ", "restTime": 60 },
+    "FTM": { "message": "Fuze Tea Melocotón lleva 1 hora de reposo ", "restTime": 60 },
+    "FTL": { "message": "Fuze Tea Limón lleva 1 hora de reposo ", "restTime": 60 },
+    "FTLB": { "message": "Fuze Tea Limón B&B lleva 1 hora de reposo ", "restTime": 60 },
+    "JDVM": { "message": "Jugo Del Valle Mandarina no lleva reposo ", "restTime": 0 },
+    "JDVC": { "message": "Jugo Del Valle Citrus lleva 1 hora de reposo ", "restTime": 60 },
+    "JDVG": { "message": "Jugo Del Valle Guayaba lleva 1 hora de reposo ", "restTime": 60 },
+    "PFI4": { "message": "Powerade Frutas Ion 4 no lleva reposo ", "restTime": 0 },
+    "PNI4": { "message": "Powerade Naranja Mandarina Ion 4 no lleva reposo ", "restTime": 0 },
+    "PMB": { "message": "Powerade Mountain Blast no lleva reposo ", "restTime": 0 },
+    "FURYG": { "message": "Fury Gold no lleva reposo ", "restTime": 0 },
+    "FURYM": { "message": "Fury Mean Green no lleva reposo ", "restTime": 0 },
+    "SWMZ": { "message": "Cristal Manzana lleva 1 hora de reposo ", "restTime": 60 },
+    "SWMA": { "message": "Cristal Mandarina lleva 1 hora de reposo ", "restTime": 60 },
+    "SP": { "message": "Sprite Fenix lleva 1 hora de reposo ", "restTime": 60 }
+};
 
         document.getElementById('abbreviation').addEventListener('input', function() {
             const abbreviation = this.value.trim().toUpperCase();
-            const data = abbreviationMessages[abbreviation] || { message: "Abreviatura no reconocida", restTime: 0, duration: 3 };
+            const data = abbreviationMessages[abbreviation] || { message: "Abreviatura no reconocida", restTime: 0 };
             document.getElementById('message').textContent = data.message;
             updateTable();
         });
 
         document.getElementById('end-time').addEventListener('input', updateTable);
+        document.getElementById('hours').addEventListener('change', updateTable);
 
         function updateTable() {
             const endTime = document.getElementById('end-time').value;
             const abbreviation = document.getElementById('abbreviation').value.trim().toUpperCase();
-            const { restTime, duration } = abbreviationMessages[abbreviation] || { restTime: 0, duration: 3 };
+            const { restTime } = abbreviationMessages[abbreviation] || { restTime: 0 };
+            const selectedHours = parseInt(document.getElementById('hours').value, 10);
 
             if (endTime) {
                 const agitEnd = new Date(`1970-01-01T${endTime}Z`);
-                const totalDuration = duration * 3600000 + (restTime > 0 ? 3600000 : 0);
+                const totalDuration = selectedHours * 3600000 + (restTime > 0 ? 3600000 : 0);
                 const start = new Date(agitEnd.getTime() - totalDuration);
 
                 const dilStart = new Date(start.getTime() + 15 * 60000);

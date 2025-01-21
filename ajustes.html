@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuste</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: darkred;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: darkred;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 80%;
+            max-width: 300px;
+        }
+        h2 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: white;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: black;
+            box-shadow: 0 0 4px rgba(76, 175, 80, 0.6);
+        }
+        input[readonly] {
+            background-color: #f4f4f4;
+            color: #555;
+        }
+        .editable {
+            background-color: #e8f5e9;
+        }
+        .hidden {
+            display: none;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            input {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Ajuste Jarabe Terminado.</h2>
+        <div class="form-group">
+            <label for="abreviatura">Sabor:</label>
+            <input type="text" id="abreviatura" class="editable" placeholder="Ingrese el sabor">
+        </div>
+        <div class="form-group">
+            <label for="nombreCompleto">Nombre Completo:</label>
+            <input type="text" id="nombreCompleto" readonly>
+        </div>
+        <div class="form-group">
+            <label for="brixJT">Brix JT:</label>
+            <input type="number" id="brixJT" class="editable" placeholder="Ingrese el valor de Brix JT">
+        </div>
+        <div class="form-group">
+            <label for="unidades">Unidades:</label>
+            <input type="number" id="unidades" class="editable" placeholder="Ingrese la cantidad de unidades">
+        </div>
+        <div class="form-group hidden">
+            <input type="hidden" id="volumenFinal">
+            <input type="hidden" id="gravedadEspecifica">
+            <input type="hidden" id="brixFinal">
+            <input type="hidden" id="volumenAguaUnidad">
+        </div>
+        <div class="form-group">
+            <label for="volumenAguaTotal">Volumen de Agua a ajustar:</label>
+            <input type="number" id="volumenAguaTotal" readonly>
+        </div>
+    </div>
+
+    <script>
+        const nombresCompletos = {
+            spf: { nombre: "Sprite FENIX", volumenFinal: 312.6, gravedadEspecifica: 1.121, brixFinal: 28.96 },
+            cc: { nombre: "Coca-Cola Clásica", volumenFinal: 300.0, gravedadEspecifica: 1.256689851, brixFinal: 54.85 },
+            fnh: { nombre: "Fanta Naranja Harmony", volumenFinal: 370.6, gravedadEspecifica: 1.19759, brixFinal: 44.26 },
+            uvah: { nombre: "Uva Harmony", volumenFinal: 345.0, gravedadEspecifica: 1.16301, brixFinal: 37.56 },
+            ccf: { nombre: "Coca-Cola Familiar", volumenFinal: 300.0, gravedadEspecifica: 1.20901333, brixFinal: 41.07 },
+            jdvm: { nombre: "Jugo del valle mandarina", volumenFinal: 500.3, gravedadEspecifica: 1.17567, brixFinal: 40.05 },
+            jdvg: { nombre: "Jugo del valle guayaba", volumenFinal: 559.18, gravedadEspecifica: 1.16196, brixFinal: 37.35 },
+            furyg: { nombre: "Fury Gold", volumenFinal: 500, gravedadEspecifica: 1.18, brixFinal: 40.7 },
+            furym: { nombre: "Fury Mean Green", volumenFinal: 500, gravedadEspecifica: 1.1733, brixFinal: 39.6 },
+            pmb: { nombre: "Powerade Mountain Blast", volumenFinal: 811.82, gravedadEspecifica: 1.06189, brixFinal: 15.88 },
+            pfi4: { nombre: "Powerade Frutas Ion 4", volumenFinal: 811.91, gravedadEspecifica: 1.08777, brixFinal: 21.76 },
+            csh: { nombre: "Crema Soda Harmony", volumenFinal: 359.9, gravedadEspecifica: 1.1555, brixFinal: 36.06 },
+            frkh: { nombre: "Fresca Harmony", volumenFinal: 312.7, gravedadEspecifica: 1.18463, brixFinal: 41.85 },
+            ftm: { nombre: "Fuze Tea Melocotón", volumenFinal: 500.1, gravedadEspecifica: 1.09555, brixFinal: 23.48 },
+            ftl: { nombre: "Fuze Tea Limón", volumenFinal: 500.1, gravedadEspecifica: 1.09546, brixFinal: 23.46 },
+            ftlb: { nombre: "Fuze Tea Limón B&B", volumenFinal: 285.8, gravedadEspecifica: 1.16635, brixFinal: 38.22 },
+            fsah: { nombre: "Fresa Harmony", volumenFinal: 359.9, gravedadEspecifica: 1.22552, brixFinal: 36.11 },
+        };
+
+        document.getElementById("abreviatura").addEventListener("input", function () {
+            const abreviatura = this.value.toLowerCase();
+            const datos = nombresCompletos[abreviatura];
+
+            if (datos) {
+                document.getElementById("nombreCompleto").value = datos.nombre;
+                document.getElementById("volumenFinal").value = datos.volumenFinal;
+                document.getElementById("gravedadEspecifica").value = datos.gravedadEspecifica;
+                document.getElementById("brixFinal").value = datos.brixFinal;
+            } else {
+                document.getElementById("nombreCompleto").value = "Desconocido";
+                document.getElementById("volumenFinal").value = "";
+                document.getElementById("gravedadEspecifica").value = "";
+                document.getElementById("brixFinal").value = "";
+            }
+
+            calcular();
+        });
+
+        document.getElementById("brixJT").addEventListener("input", calcular);
+        document.getElementById("unidades").addEventListener("input", calcular);
+
+        function calcular() {
+            const brixJT = parseFloat(document.getElementById("brixJT").value) || 0;
+            const unidades = parseFloat(document.getElementById("unidades").value) || 0;
+            const volumenFinal = parseFloat(document.getElementById("volumenFinal").value);
+            const gravedadEspecifica = parseFloat(document.getElementById("gravedadEspecifica").value);
+            const brixFinal = parseFloat(document.getElementById("brixFinal").value);
+
+            // Cálculo del volumen de agua tratada por unidad
+            const volumenAguaUnidad = volumenFinal * gravedadEspecifica * (1 - (brixFinal / brixJT));
+            document.getElementById("volumenAguaUnidad").value = isNaN(volumenAguaUnidad) ? "" : volumenAguaUnidad.toFixed(2);
+
+            // Cálculo del volumen de agua tratada total
+            const volumenAguaTotal = volumenAguaUnidad * unidades;
+            document.getElementById("volumenAguaTotal").value = isNaN(volumenAguaTotal) ? "" : volumenAguaTotal.toFixed(2);
+        }
+    </script>
+</body>
+</html>

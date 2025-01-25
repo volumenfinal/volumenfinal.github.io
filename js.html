@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuste Jarabe Terminado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #8B0000;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .form-container {
+            background-color: #B22222;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .form-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 95%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background-color: #F0FFF0;
+        }
+        .form-group input:disabled {
+            background-color: #F4F4F4;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        const sabores = {
+            'ccf': { nombre: 'Coca-Cola Familiar', kgAz: 142.26 },
+            'cc': { nombre: 'Coca-Cola Clásica', kgAz: 203.23 },
+            'frkh': { nombre: 'Fresca Harmony', kgAz: 148 },
+            'uvah': { nombre: 'Uva Harmony', kgAz: 148 },
+            'fsah': { nombre: 'Fresa Harmony', kgAz: 148 },
+            'csh': { nombre: 'Crema Soda Harmony', kgAz: 148 },
+            'fnh': { nombre: 'Fanta Naranja Harmony', kgAz: 188 },
+            'jdvm': { nombre: 'Jugo del valle mandarina', kgAz: 215.28 },
+            'fp': { nombre: 'Fanta Piña', kgAz: 90 },
+            'spf': { nombre: 'Sprite Fénix', kgAz: 94.8 },
+            'pmb': { nombre: 'Powerade Mountain Blast', kgAz: 120 },
+            'pfi4': { nombre: 'Powerade Frutas Ion 4', kgAz: 176.59 },
+            'ftm': { nombre: 'Fuze Tea Melocotón', kgAz: 120.02 },
+            'ftl': { nombre: 'Fuze Tea Limón', kgAz: 120.16 },
+            'ftlb': { nombre: 'Fuze Tea Limón L-6', kgAz: 120.16 },
+            'pni4': { nombre: 'Powerade Naranja Mandarina Ion 4', kgAz: 176.59 },
+            'furyg': { nombre: 'Fury Gold', kgAz: 220 },
+            'furym': { nombre: 'Fury Mean Green', kgAz: 119.9 },
+            'jdvg': { nombre: 'Jugo del valle guayaba', kgAz: 233.6103 },
+            'jdvc': { nombre: 'Jugo del valle citru naranja', kgAz: 80 },
+        };
+
+        function actualizarFormulario() {
+            const sabor = document.getElementById('sabor').value;
+            const brixJs = parseFloat(document.getElementById('brix-js').value) || 0;
+            const unidades = parseInt(document.getElementById('unidades').value) || 0;
+
+            // Mostrar nombre completo del sabor
+            const nombreCompleto = sabores[sabor]?.nombre || "";
+            const nombreCompletoField = document.getElementById('nombre-completo');
+            if (nombreCompleto) {
+                nombreCompletoField.value = nombreCompleto;
+                nombreCompletoField.parentElement.classList.remove('hidden');
+            } else {
+                nombreCompletoField.parentElement.classList.add('hidden');
+            }
+
+            const kgAzUnidad = sabores[sabor]?.kgAz || 0;
+            const densidad = Math.pow(brixJs, 2) * 1.96258e-5 + (0.003519623 * brixJs) + 1.003606866;
+            const bD = (brixJs / 100) * densidad;
+            const volumenJsUnidad = kgAzUnidad / bD;
+            const volumenJs = volumenJsUnidad * unidades;
+
+            document.getElementById('volumen').value = volumenJs ? Math.round(volumenJs) : "";
+        }
+    </script>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Ajuste Jarabe Simple.</h1>
+        <div class="form-group">
+            <label for="sabor">Sabor:</label>
+            <input type="text" id="sabor" oninput="actualizarFormulario()" placeholder="Ingrese el sabor">
+        </div>
+        <div class="form-group hidden">
+            <label for="nombre-completo"></label>
+            <input type="text" id="nombre-completo" disabled>
+        </div>
+        <div class="form-group">
+            <label for="brix-js">Brix JS:</label>
+            <input type="number" id="brix-js" oninput="actualizarFormulario()" placeholder="Ingrese el valor de Brix JS">
+        </div>
+        <div class="form-group">
+            <label for="unidades">Unidades:</label>
+            <input type="number" id="unidades" oninput="actualizarFormulario()" placeholder="Ingrese la cantidad de unidades">
+        </div>
+        <div class="form-group">
+            <label for="volumen">Volumen de Jarabe Simple:</label>
+            <input type="number" id="volumen" disabled placeholder="">
+        </div>
+    </div>
+</body>
+</html>

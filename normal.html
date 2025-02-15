@@ -12,6 +12,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            position: relative;
         }
 
         header {
@@ -19,6 +20,25 @@
             padding: 1rem;
             background-color: darkred;
             color: white;
+            position: relative;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            color: darkred;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: red;
         }
 
         main {
@@ -71,6 +91,7 @@
             color: white;
             font-size: 2rem;
         }
+        
         footer {
             text-align: center;
             padding: 1rem;
@@ -81,7 +102,7 @@
 </head>
 <body>
     <header>
-        <h1>¿Qué quieres hacer?</h1>
+        <buton class="logout-button" onclick="logout()">Cerrar Sesión</button>
     </header>
     <main>
         <div class="box">
@@ -100,7 +121,7 @@
     <script>
         window.onload = function () {
             if (localStorage.getItem("loggedIn") !== "true") {
-                window.location.href = "login.html";
+                window.location.href = "index.html";
             }
         };
 
@@ -117,6 +138,11 @@
                 loadingScreen.style.display = 'none';
                 callback();
             }, 1500);
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedIn");
+            window.location.href = "index.html";
         }
     </script>
 </body>

@@ -15,10 +15,28 @@
         }
 
         header {
+            position: relative;
             text-align: center;
             padding: 1rem;
             background-color: darkred;
             color: white;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            color: darkred;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .logout-button:hover {
+            background-color: lightgray;
         }
 
         main {
@@ -71,6 +89,7 @@
             color: white;
             font-size: 2rem;
         }
+
         footer {
             text-align: center;
             padding: 1rem;
@@ -81,7 +100,7 @@
 </head>
 <body>
     <header>
-        <h1>¿Qué quieres hacer?</h1>
+        <button class="logout-button" onclick="logout()">Cerrar Sesión</button>
     </header>
     <main>
         <div class="box">
@@ -91,7 +110,6 @@
             <button onclick="redirectWithLoading('horasauto.html')">Llenar reporte</button>
             <button onclick="redirectWithLoading('unidades.html')">Calcular Unidades</button>
             <button onclick="redirectWithLoading('registrar.html')">Registrar Usuarios</button>
-            <button onclick="redirectWithLoading('consultar.html')">Consultar</button>
         </div>
     </main>
     <footer>
@@ -103,7 +121,7 @@
     <script>
         window.onload = function () {
             if (localStorage.getItem("loggedIn") !== "true") {
-                window.location.href = "login.html";
+                window.location.href = "index.html";
             }
         };
 
@@ -120,6 +138,11 @@
                 loadingScreen.style.display = 'none';
                 callback();
             }, 1500);
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedIn");
+            window.location.href = "index.html";
         }
     </script>
 </body>

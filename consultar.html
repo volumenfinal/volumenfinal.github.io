@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: darkred;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: white;
+        }
+
+        table {
+            width: 60%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        button {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #cc0000;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            animation: fadeOut 3s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Usuarios</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="user-table-body"></tbody>
+    </table>
+
+    <div id="overlay" class="overlay">
+        <div class="modal">
+            <p>¿Quieres eliminar este usuario?</p>
+            <button id="confirm-delete">Sí</button>
+            <button onclick="closeModal()">No</button>
+        </div>
+    </div>
+
+    <div id="notification" class="notification">Usuario eliminado</div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxV9tCHCPocCuacKYmZMAAaYJAoG5xoOA",
+            authDomain: "jarabe-34dd4.firebaseapp.com",
+            projectId: "jarabe-34dd4",
+            storageBucket: "jarabe-34dd4.appspot.com",
+            messagingSenderId: "641991757108",
+            appId: "1:641991757108:web:bdb5a4a5cacd858f55e961"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        let userIdToDelete = null;
+
+        function fetchUsers() {
+            db.collection("users").onSnapshot((querySnapshot) => {
+                const userTableBody = document.getElementById("user-table-body");
+                userTableBody.innerHTML = "";
+
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const tr = document.createElement("tr");
+
+                    tr.innerHTML = `
+                        <td>${user.username}</td>
+                        <td>${user.role}</td>
+                        <td><button onclick="openModal('${doc.id}')">Eliminar</button></td>
+                    `;
+
+                    userTableBody.appendChild(tr);
+                });
+            }, (error) => {
+                console.error("Error obteniendo usuarios: ", error);
+            });
+        }
+
+        function openModal(userId) {
+            userIdToDelete = userId;
+            document.getElementById("overlay").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        document.getElementById("confirm-delete").addEventListener("click", function() {
+            if (userIdToDelete) {
+                deleteUser(userIdToDelete);
+                closeModal();
+            }
+        });
+
+        function deleteUser(userId) {
+            db.collection("users").doc(userId).delete().then(() => {
+                showNotification("Usuario eliminado");
+                fetchUsers();
+            }).catch((error) => {
+                console.error("Error al eliminar usuario: ", error);
+            });
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById("notification");
+            notification.textContent = message;
+            notification.style.display = "block";
+            setTimeout(() => {
+                notification.style.display = "none";
+            }, 3000);
+        }
+
+        fetchUsers();
+    </script>
+</body>
+</html>

@@ -77,7 +77,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<script>
+
+    <script>
     document.addEventListener("DOMContentLoaded", function () {
         const firebaseConfig = {
             apiKey: "AIzaSyDxV9tCHCPocCuacKYmZMAAaYJAoG5xoOA",
@@ -100,7 +101,7 @@
             document.getElementById("password").value = localStorage.getItem("password");
         }
 
-        // Función de login corregida
+        // Función de login con verificación de sesión activa
         window.login = function () {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
@@ -110,7 +111,19 @@
                 .then((userCredential) => {
                     const user = userCredential.user;
                     console.log("Inicio de sesión exitoso:", user.uid);
-                    return db.collection("users").doc(user.uid).get();
+                    
+                    return db.collection("sessions").doc(user.uid).get()
+                        .then((doc) => {
+                            if (doc.exists && doc.data().active) {
+                                throw new Error("Ya hay una sesión activa en otro navegador.");
+                            } else {
+                                return db.collection("sessions").doc(user.uid).set({
+                                    active: true,
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
+                        })
+                        .then(() => db.collection("users").doc(user.uid).get());
                 })
                 .then((doc) => {
                     if (doc.exists) {
@@ -158,6 +171,5 @@
         }
     });
 </script>
-
 </body>
 </html>

@@ -77,108 +77,96 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxV9tCHCPocCuacKYmZMAAaYJAoG5xoOA",
+            authDomain: "jarabe-34dd4.firebaseapp.com",
+            projectId: "jarabe-34dd4",
+            storageBucket: "jarabe-34dd4.firebasestorage.app",
+            messagingSenderId: "641991757108",
+            appId: "1:641991757108:web:bdb5a4a5cacd858f55e961",
+        };
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const firebaseConfig = {
-                apiKey: "AIzaSyDxV9tCHCPocCuacKYmZMAAaYJAoG5xoOA",
-                authDomain: "jarabe-34dd4.firebaseapp.com",
-                projectId: "jarabe-34dd4",
-                storageBucket: "jarabe-34dd4.firebasestorage.app",
-                messagingSenderId: "641991757108",
-                appId: "1:641991757108:web:bdb5a4a5cacd858f55e961",
-            };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-            firebase.initializeApp(firebaseConfig);
-            const auth = firebase.auth();
-            const db = firebase.firestore();
+        console.log("Firebase inicializado correctamente.");
 
-            console.log("Firebase inicializado correctamente.");
+        // Verificar si hay credenciales guardadas
+        if (localStorage.getItem("username")) {
+            document.getElementById("username").value = localStorage.getItem("username");
+            document.getElementById("password").value = localStorage.getItem("password");
+        }
 
-            // Recuperar credenciales guardadas
-            if (localStorage.getItem("username")) {
-                document.getElementById("username").value = localStorage.getItem("username");
-                document.getElementById("password").value = localStorage.getItem("password");
-            }
+        // Función de login corregida
+        window.login = function () {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const email = username + "@example.com";
 
-            // Verificar si hay una sesión activa
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    db.collection("users").doc(user.uid).get().then(doc => {
-                        if (doc.exists) {
-                            window.location.href = doc.data().role === "admin" ? "admin.html" : "normal.html";
-                        }
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("Inicio de sesión exitoso:", user.uid);
+                    return db.collection("sessions").doc(user.uid).get();
+                })
+                .then((doc) => {
+                    if (doc.exists && doc.data().active) {
+                        throw new Error("Ya hay una sesión activa en otro navegador.");
+                    }
+                    return db.collection("sessions").doc(auth.currentUser.uid).set({
+                        active: true,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                }
-            });
+                })
+                .then(() => {
+                    localStorage.setItem("loggedIn", "true");
+                    localStorage.setItem("username", username);
+                    localStorage.setItem("password", password);
+                    return db.collection("users").doc(auth.currentUser.uid).get();
+                })
+                .then((doc) => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        console.log("Usuario obtenido de Firestore:", userData);
+                        
+                        window.location.href = userData.role === "admin" ? "admin.html" : "normal.html";
+                    } else {
+                        showNotification("No se encontraron datos del usuario.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error en el proceso de login:", error);
+                    showNotification("Error: " + error.message);
+                });
+        };
 
-            // Función de login
-            window.login = function () {
-                const username = document.getElementById("username").value;
-                const password = document.getElementById("password").value;
-                const email = username + "@example.com";
-
-                auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        const user = userCredential.user;
-                        return db.collection("users").doc(user.uid).get();
-                    })
-                    .then((doc) => {
-                        if (doc.exists) {
-                            const userData = doc.data();
-                            return db.collection("sessions").doc(userData.uid).get();
-                        } else {
-                            throw new Error("No se encontraron datos del usuario.");
-                        }
-                    })
-                    .then((sessionDoc) => {
-                        if (sessionDoc.exists && sessionDoc.data().active) {
-                            throw new Error("Ya hay una sesión activa en otro navegador.");
-                        } else {
-                            const user = auth.currentUser;
-                            db.collection("sessions").doc(user.uid).set({
-                                active: true,
-                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-
-                            localStorage.setItem("username", username);
-                            localStorage.setItem("password", password);
-
-                            if (sessionStorage.getItem("userRole") === "admin") {
-                                window.location.href = "admin.html";
-                            } else {
-                                window.location.href = "normal.html";
-                            }
-                        }
-                    })
-                    .catch((error) => {
-                        showNotification("Error: " + error.message);
+        // Función de cerrar sesión corregida
+        window.logout = function () {
+            const user = auth.currentUser;
+            if (user) {
+                db.collection("sessions").doc(user.uid).update({ active: false })
+                    .then(() => auth.signOut())
+                    .then(() => {
+                        localStorage.removeItem("loggedIn");
+                        localStorage.removeItem("username");
+                        localStorage.removeItem("password");
+                        window.location.href = "index.html";
                     });
-            };
-
-            // Función de cerrar sesión
-            window.logout = function () {
-                const user = auth.currentUser;
-                if (user) {
-                    db.collection("sessions").doc(user.uid).update({ active: false })
-                        .then(() => auth.signOut())
-                        .then(() => {
-                            sessionStorage.removeItem("loggedIn");
-                            sessionStorage.removeItem("userRole");
-                            window.location.href = "index.html";
-                        });
-                }
-            };
-
-            function showNotification(message) {
-                const notification = document.getElementById("notification");
-                notification.innerText = message;
-                notification.style.display = 'block';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
             }
-        });
-    </script>
+        };
+
+        function showNotification(message) {
+            const notification = document.getElementById("notification");
+            notification.innerText = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+    });
+</script>
 </body>
 </html>

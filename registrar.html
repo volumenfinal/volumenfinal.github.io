@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuarios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: darkred;
+            flex-direction: column;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        input, select, button {
+            display: block;
+            width: 97%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: skyblue;
+        }
+        .notification {
+            display: none;
+            position: absolute;
+            top: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="notification" id="notification">Usuario registrado correctamente</div>
+    <div class="container">
+        <h2>Registro de Usuario</h2>
+        <form id="registerForm">
+            <input type="text" id="username" placeholder="Usuario" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <select id="role">
+                <option value="usuario">Usuario</option>
+                <option value="admin">Administrador</option>
+            </select>
+            <button type="submit">Registrar</button>
+        </form>
+        <p id="message"></p>
+    </div>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxV9tCHCPocCuacKYmZMAAaYJAoG5xoOA",
+            authDomain: "jarabe-34dd4.firebaseapp.com",
+            projectId: "jarabe-34dd4",
+            storageBucket: "jarabe-34dd4.firebasestorage.app",
+            messagingSenderId: "641991757108",
+            appId: "1:641991757108:web:bdb5a4a5cacd858f55e961",
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('username').value + "@example.com";
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    return db.collection("users").doc(userCredential.user.uid).set({
+                        username: document.getElementById('username').value,
+                        role: role
+                    });
+                })
+                .then(() => {
+                    showNotification("Usuario registrado correctamente");
+                    document.getElementById('registerForm').reset();
+                })
+                .catch((error) => {
+                    showNotification("Error: " + error.message);
+                });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Principal</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: darkred;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 1rem;
+            background-color: darkred;
+            color: white;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .box {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            color: white;
+        }
+
+        .box button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background-color: darkred;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .box button:hover {
+            background-color: red;
+        }
+
+        #loadingScreen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2rem;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: darkred;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>¿Qué quieres hacer?</h1>
+    </header>
+    <main>
+        <div class="box">
+            <button onclick="redirectWithLoading('js.html')">Ajuste Jarabe Simple</button>
+            <button onclick="redirectWithLoading('volfinal.html')">Calcular Volumen</button>
+            <button onclick="redirectWithLoading('ajustes.html')">Ajuste Final</button>
+            <button onclick="redirectWithLoading('horasauto.html')">Llenar reporte</button>
+            <button onclick="redirectWithLoading('unidades.html')">Calcular Unidades</button>
+            <button onclick="redirectWithLoading('registrar.html')">Registrar Usuarios</button>
+        </div>
+    </main>
+    <footer>
+        <p>Para Jarabe Terminado. Planta Nixapa.</p>
+    </footer>
+
+    <div id="loadingScreen">Cargando...</div>
+
+    <script>
+        window.onload = function () {
+            if (localStorage.getItem("loggedIn") !== "true") {
+                window.location.href = "login.html";
+            }
+        };
+
+        function redirectWithLoading(targetUrl) {
+            showLoadingScreen(() => {
+                window.location.href = targetUrl;
+            });
+        }
+
+        function showLoadingScreen(callback) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.display = 'flex';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                callback();
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

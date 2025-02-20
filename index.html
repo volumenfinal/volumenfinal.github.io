@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/1.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="image.png">
+    <link rel="manifest" href="manifest.json">
+
     <style>
         body {
             margin: 0;
@@ -101,7 +107,7 @@
             document.getElementById("password").value = localStorage.getItem("password");
         }
 
-        // Función de login con verificación de sesión activa
+        // Función de login sin verificación de sesión activa
         window.login = function () {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
@@ -111,19 +117,9 @@
                 .then((userCredential) => {
                     const user = userCredential.user;
                     console.log("Inicio de sesión exitoso:", user.uid);
-                    
-                    return db.collection("sessions").doc(user.uid).get()
-                        .then((doc) => {
-                            if (doc.exists && doc.data().active) {
-                                throw new Error("Ya hay una sesión activa en otro navegador.");
-                            } else {
-                                return db.collection("sessions").doc(user.uid).set({
-                                    active: true,
-                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                                });
-                            }
-                        })
-                        .then(() => db.collection("users").doc(user.uid).get());
+
+                    // Obtener datos del usuario desde Firestore
+                    return db.collection("users").doc(user.uid).get();
                 })
                 .then((doc) => {
                     if (doc.exists) {
@@ -131,7 +127,8 @@
                         console.log("Usuario obtenido de Firestore:", userData);
                         localStorage.setItem("loggedIn", "true");
                         localStorage.setItem("username", username);
-                        
+
+                        // Redirigir según el rol del usuario
                         if (userData.role === "admin") {
                             window.location.href = "admin.html";
                         } else {
@@ -143,16 +140,15 @@
                 })
                 .catch((error) => {
                     console.error("Error en el proceso de login:", error);
-                    showNotification("Error: " + error.message);
+                    showNotification("Error: usuario y contraseña no válido.");
                 });
         };
 
-        // Función de cerrar sesión corregida
+        // Función de cerrar sesión
         window.logout = function () {
             const user = auth.currentUser;
             if (user) {
-                db.collection("sessions").doc(user.uid).update({ active: false })
-                    .then(() => auth.signOut())
+                auth.signOut()
                     .then(() => {
                         localStorage.removeItem("loggedIn");
                         localStorage.removeItem("username");
@@ -170,6 +166,6 @@
             }, 3000);
         }
     });
-</script>
+    </script>
 </body>
 </html>

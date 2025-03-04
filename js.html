@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajuste Jarabe Simple</title>
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="2.png">
     <link rel="apple-touch-icon" sizes="180x180" href="image.png">
     <link rel="manifest" href="manifest.json">
@@ -18,18 +17,15 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            padding: 10px;
         }
         .form-container {
             background-color: #B22222;
             padding: 20px;
             border-radius: 10px;
-            width: 300px;
+            width: 100%;
+            max-width: 350px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .form-container h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 20px;
         }
         .form-group {
             margin-bottom: 15px;
@@ -40,7 +36,7 @@
             margin-bottom: 5px;
         }
         .form-group input {
-            width: 95%;
+            width: 100%;
             padding: 8px;
             border: none;
             border-radius: 5px;
@@ -53,11 +49,8 @@
             display: none;
         }
         @media (max-width: 600px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-            input {
-                font-size: 0.9rem;
+            .form-container {
+                padding: 15px;
             }
         }
     </style>
@@ -86,40 +79,34 @@
         };
 
         function actualizarFormulario() {
-            const sabor = document.getElementById('sabor').value;
+            const saborInput = document.getElementById('sabor').value.toLowerCase();
             const brixJs = parseFloat(document.getElementById('brix-js').value) || 0;
             const unidades = parseInt(document.getElementById('unidades').value) || 0;
-
-            // Mostrar nombre completo del sabor
-            const nombreCompleto = sabores[sabor]?.nombre || "";
-            const nombreCompletoField = document.getElementById('nombre-completo');
-            if (nombreCompleto) {
-                nombreCompletoField.value = nombreCompleto;
-                nombreCompletoField.parentElement.classList.remove('hidden');
-            } else {
-                nombreCompletoField.parentElement.classList.add('hidden');
-            }
-
-            const kgAzUnidad = sabores[sabor]?.kgAz || 0;
+            const volumenReal = parseFloat(document.getElementById('volumen-real').value) || 0;
+            
+            const nombreCompleto = sabores[saborInput]?.nombre || "";
+            document.getElementById('nombre-completo').value = nombreCompleto;
+            
+            const kgAzUnidad = sabores[saborInput]?.kgAz || 0;
             const densidad = Math.pow(brixJs, 2) * 1.96258e-5 + (0.003519623 * brixJs) + 1.003606866;
             const bD = (brixJs / 100) * densidad;
             const volumenJsUnidad = kgAzUnidad / bD;
             const volumenJs = volumenJsUnidad * unidades;
-
+            
             document.getElementById('volumen').value = volumenJs ? Math.round(volumenJs) : "";
+            document.getElementById('litros-faltantes').value = volumenJs ? Math.round(volumenJs - volumenReal) : "";
         }
     </script>
 </head>
 <body>
     <div class="form-container">
         <h1>Ajuste Jarabe Simple</h1>
-        <p>Recuerda siempre usar letras minúscula</p>
         <div class="form-group">
             <label for="sabor">Sabor:</label>
             <input type="text" id="sabor" oninput="actualizarFormulario()" placeholder="Ingrese el sabor">
         </div>
-        <div class="form-group hidden">
-            <label for="nombre-completo"></label>
+        <div class="form-group">
+            <label for="nombre-completo">Nombre Completo:</label>
             <input type="text" id="nombre-completo" disabled>
         </div>
         <div class="form-group">
@@ -132,7 +119,15 @@
         </div>
         <div class="form-group">
             <label for="volumen">Volumen de Jarabe Simple:</label>
-            <input type="number" id="volumen" disabled placeholder="">
+            <input type="number" id="volumen" disabled>
+        </div>
+        <div class="form-group">
+            <label for="volumen-real">Volumen Real:</label>
+            <input type="number" id="volumen-real" oninput="actualizarFormulario()" placeholder="Ingrese el volumen real">
+        </div>
+        <div class="form-group">
+            <label for="litros-faltantes">Litros Faltantes:</label>
+            <input type="number" id="litros-faltantes" disabled>
         </div>
     </div>
 </body>

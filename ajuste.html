@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuste</title>
+    <script type="module">
+        // Importa las funciones necesarias de Firebase Firestore
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDVHMl5IzVCv11dKOjMlKIIOMnbBp5eHXE",
+            authDomain: "almacenar-de263.firebaseapp.com",
+            projectId: "almacenar-de263",
+            storageBucket: "almacenar-de263.appspot.com",
+            messagingSenderId: "195901454057",
+            appId: "1:195901454057:web:84f0b639145157ee216278"
+        };
+
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Escucha el evento de entrada en el campo "abreviatura"
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("abreviatura").addEventListener("input", async function () {
+                const abreviatura = this.value.toLowerCase();
+                console.log("Buscando abreviatura:", abreviatura);
+
+                // Consulta Firestore
+                const q = query(collection(db, "jarabe"), where("abreviatura", "==", abreviatura));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    // Obtiene el primer documento que coincide
+                    const doc = querySnapshot.docs[0];
+                    const datos = doc.data();
+                    console.log("Datos obtenidos:", datos);
+
+                    // Llena los campos del formulario
+                    document.getElementById("nombreCompleto").value = datos.nombre || "";
+                    document.getElementById("volumenFinal").value = datos.volumen || "";
+                    document.getElementById("gravedadEspecifica").value = datos.densidad || "";
+                    document.getElementById("brixFinal").value = datos.brix || "";
+                } else {
+                    console.warn("No se encontraron datos para:", abreviatura);
+                    document.getElementById("nombreCompleto").value = "Desconocido";
+                    document.getElementById("volumenFinal").value = "";
+                    document.getElementById("gravedadEspecifica").value = "";
+                    document.getElementById("brixFinal").value = "";
+                }
+
+                // Ejecuta el cálculo
+                calcular();
+            });
+
+            // Escucha cambios en los campos de entrada para recalcular
+            document.getElementById("brixJT").addEventListener("input", calcular);
+            document.getElementById("unidades").addEventListener("input", calcular);
+        });
+
+        // Función para calcular el volumen de agua
+        function calcular() {
+            const brixJT = parseFloat(document.getElementById("brixJT").value) || 0;
+            const unidades = parseFloat(document.getElementById("unidades").value) || 0;
+            const volumenFinal = parseFloat(document.getElementById("volumenFinal").value) || 0;
+            const gravedadEspecifica = parseFloat(document.getElementById("gravedadEspecifica").value) || 0;
+            const brixFinal = parseFloat(document.getElementById("brixFinal").value) || 0;
+
+            if (brixJT === 0) {
+                document.getElementById("volumenAguaTotal").value = "";
+                return;
+            }
+
+            const volumenAguaUnidad = volumenFinal * gravedadEspecifica * (1 - (brixFinal / brixJT));
+            const volumenAguaTotal = volumenAguaUnidad * unidades;
+            document.getElementById("volumenAguaTotal").value = isNaN(volumenAguaTotal) ? "" : volumenAguaTotal.toFixed(2);
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: darkred;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        .container {
+            background: darkred;
+            border-radius: 10px;
+            padding: 20px;
+            width: 80%;
+            max-width: 300px;
+            position: relative;
+            z-index: 1;
+        }
+        h2 { text-align: center; color: white; }
+        .form-group { margin-bottom: 15px; }
+        label { color: white; }
+        input { width: 100%; padding: 10px; border-radius: 5px; }
+        input[readonly] { background-color: #f4f4f4; }
+        .editable { background-color: #e8f5e9; }
+
+        /* Oculta los campos que no quieres mostrar */
+        #volumenFinal, #gravedadEspecifica, #brixFinal {
+            display: none;
+        }
+
+        /* Animación de burbujas */
+        @keyframes bubble {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1000px);
+                opacity: 0;
+            }
+        }
+
+        .bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .bubbles div {
+            position: absolute;
+            bottom: -100px;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: bubble 10s infinite;
+        }
+
+        .bubbles div:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .bubbles div:nth-child(2) {
+            left: 20%;
+            animation-delay: 2s;
+        }
+
+        .bubbles div:nth-child(3) {
+            left: 30%;
+            animation-delay: 4s;
+        }
+
+        .bubbles div:nth-child(4) {
+            left: 40%;
+            animation-delay: 6s;
+        }
+
+        .bubbles div:nth-child(5) {
+            left: 50%;
+            animation-delay: 8s;
+        }
+
+        .bubbles div:nth-child(6) {
+            left: 60%;
+            animation-delay: 10s;
+        }
+
+        .bubbles div:nth-child(7) {
+            left: 70%;
+            animation-delay: 12s;
+        }
+
+        .bubbles div:nth-child(8) {
+            left: 80%;
+            animation-delay: 14s;
+        }
+
+        .bubbles div:nth-child(9) {
+            left: 90%;
+            animation-delay: 16s;
+        }
+
+        .bubbles div:nth-child(10) {
+            left: 100%;
+            animation-delay: 18s;
+        }
+    </style>
+</head>
+<body>
+    <div class="bubbles">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    <div class="container">
+        <h2>Ajuste Jarabe Terminado</h2>
+        <div class="form-group">
+            <label for="abreviatura">Sabor:</label>
+            <input type="text" id="abreviatura" class="editable" placeholder="Ingrese el sabor">
+        </div>
+        <div class="form-group">
+            <label for="nombreCompleto">Nombre Completo:</label>
+            <input type="text" id="nombreCompleto" readonly>
+        </div>
+        <!-- Campos ocultos -->
+        <div class="form-group">
+            <label for="volumenFinal"></label>
+            <input type="number" id="volumenFinal" readonly>
+        </div>
+        <div class="form-group">
+            <label for="gravedadEspecifica"></label>
+            <input type="number" id="gravedadEspecifica" readonly>
+        </div>
+        <div class="form-group">
+            <label for="brixFinal"></label>
+            <input type="number" id="brixFinal" readonly>
+        </div>
+        <!-- Fin de campos ocultos -->
+        <div class="form-group">
+            <label for="brixJT">Brix JT:</label>
+            <input type="number" id="brixJT" class="editable" placeholder="Ingrese el valor de Brix JT">
+        </div>
+        <div class="form-group">
+            <label for="unidades">Unidades:</label>
+            <input type="number" id="unidades" class="editable" placeholder="Ingrese la cantidad de unidades">
+        </div>
+        <div class="form-group">
+            <label for="volumenAguaTotal">Volumen de Agua a ajustar:</label>
+            <input type="number" id="volumenAguaTotal" readonly>
+        </div>
+    </div>
+</body>
+</html>

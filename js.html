@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajuste Jarabe Simple</title>
-    <link rel="icon" type="image/png" href="2.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="image.png">
-    <link rel="manifest" href="manifest.json">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,14 +17,17 @@
             height: 100vh;
             margin: 0;
             padding: 10px;
+            overflow: auto;
         }
         .form-container {
-            background-color: #B22222;
+            background-color: rgba(178, 34, 34, 0.9);
             padding: 20px;
             border-radius: 10px;
-            width: 100%;
-            max-width: 350px;
+            width: 75%;
+            max-width: 300px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
         }
         .form-group {
             margin-bottom: 15px;
@@ -36,99 +38,108 @@
             margin-bottom: 5px;
         }
         .form-group input {
-            width: 100%;
-            padding: 8px;
+            width: 75%;
+            padding: 10px;
             border: none;
             border-radius: 5px;
             background-color: #F0FFF0;
         }
-        .form-group input:disabled {
-            background-color: #F4F4F4;
-        }
-        .hidden {
-            display: none;
-        }
         @media (max-width: 600px) {
+            body {
+                align-items: flex-start;
+                height: auto;
+            }
             .form-container {
                 padding: 15px;
+                max-width: 100%;
             }
         }
     </style>
     <script>
-        const sabores = {
-            'ccf': { nombre: 'Coca-Cola Familiar', kgAz: 142.26 },
-            'cc': { nombre: 'Coca-Cola Clásica', kgAz: 203.23 },
-            'frkh': { nombre: 'Fresca Harmony', kgAz: 148 },
-            'uvah': { nombre: 'Uva Harmony', kgAz: 148 },
-            'fsah': { nombre: 'Fresa Harmony', kgAz: 148 },
-            'csh': { nombre: 'Crema Soda Harmony', kgAz: 148 },
-            'fnh': { nombre: 'Fanta Naranja Harmony', kgAz: 188 },
-            'jdvm': { nombre: 'Jugo del valle mandarina', kgAz: 215.28 },
-            'fp': { nombre: 'Fanta Piña', kgAz: 90 },
-            'spf': { nombre: 'Sprite Fénix', kgAz: 94.8 },
-            'pmb': { nombre: 'Powerade Mountain Blast', kgAz: 120 },
-            'pfi4': { nombre: 'Powerade Frutas Ion 4', kgAz: 176.59 },
-            'ftm': { nombre: 'Fuze Tea Melocotón', kgAz: 120.02 },
-            'ftl': { nombre: 'Fuze Tea Limón', kgAz: 120.16 },
-            'ftlb': { nombre: 'Fuze Tea Limón L-6', kgAz: 120.16 },
-            'pni4': { nombre: 'Powerade Naranja Mandarina Ion 4', kgAz: 176.59 },
-            'furyg': { nombre: 'Fury Gold', kgAz: 220 },
-            'furym': { nombre: 'Fury Mean Green', kgAz: 119.9 },
-            'jdvg': { nombre: 'Jugo del valle guayaba', kgAz: 233.6103 },
-            'jdvc': { nombre: 'Jugo del valle citru naranja', kgAz: 80 },
+        const firebaseConfig = {
+            apiKey: "AIzaSyDVHMl5IzVCv11dKOjMlKIIOMnbBp5eHXE",
+            authDomain: "almacenar-de263.firebaseapp.com",
+            projectId: "almacenar-de263",
+            storageBucket: "almacenar-de263.firebasestorage.app",
+            messagingSenderId: "195901454057",
+            appId: "1:195901454057:web:84f0b639145157ee216278"
         };
 
-        function actualizarFormulario() {
-            const saborInput = document.getElementById('sabor').value.toLowerCase();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function actualizarFormulario() {
+            const saborInput = document.getElementById('sabor').value.trim().toLowerCase();
             const brixJs = parseFloat(document.getElementById('brix-js').value) || 0;
             const unidades = parseInt(document.getElementById('unidades').value) || 0;
             const volumenReal = parseFloat(document.getElementById('volumen-real').value) || 0;
             
-            const nombreCompleto = sabores[saborInput]?.nombre || "";
-            document.getElementById('nombre-completo').value = nombreCompleto;
-            
-            const kgAzUnidad = sabores[saborInput]?.kgAz || 0;
-            const densidad = Math.pow(brixJs, 2) * 1.96258e-5 + (0.003519623 * brixJs) + 1.003606866;
-            const bD = (brixJs / 100) * densidad;
-            const volumenJsUnidad = kgAzUnidad / bD;
-            const volumenJs = volumenJsUnidad * unidades;
-            
-            document.getElementById('volumen').value = volumenJs ? Math.round(volumenJs) : "";
-            document.getElementById('litros-faltantes').value = volumenJs ? Math.round(volumenJs - volumenReal) : "";
+            try {
+                const snapshot = await db.collection("jarabesimple").where("id", "==", saborInput).get();
+                if (!snapshot.empty) {
+                    const data = snapshot.docs[0].data();
+                    document.getElementById('nombre-completo').value = data.nombre;
+                    const kgAzUnidad = data.kgAz;
+
+                    const densidad = Math.pow(brixJs, 2) * 1.96258e-5 + (0.003519623 * brixJs) + 1.003606866;
+                    const bD = (brixJs / 100) * densidad;
+                    const volumenJsUnidad = kgAzUnidad / bD;
+                    const volumenJs = volumenJsUnidad * unidades;
+                    
+                    document.getElementById('volumen').value = volumenJs ? Math.round(volumenJs) : "";
+                    document.getElementById('litros-faltantes').value = volumenJs ? Math.round(volumenJs - volumenReal) : "";
+                } else {
+                    document.getElementById('nombre-completo').value = "No encontrado";
+                    document.getElementById('volumen').value = "";
+                    document.getElementById('litros-faltantes').value = "";
+                }
+            } catch (error) {
+                console.error("Error obteniendo datos: ", error);
+            }
         }
     </script>
 </head>
 <body>
     <div class="form-container">
-        <h1>Ajuste Jarabe Simple</h1>
+        <h2>Ajuste Jarabe Simple</h2>
         <div class="form-group">
             <label for="sabor">Sabor:</label>
             <input type="text" id="sabor" oninput="actualizarFormulario()" placeholder="Ingrese el sabor">
         </div>
         <div class="form-group">
-            <label for="nombre-completo">Nombre Completo:</label>
+            <label for="nombre-completo"></label>
             <input type="text" id="nombre-completo" disabled>
         </div>
         <div class="form-group">
             <label for="brix-js">Brix JS:</label>
-            <input type="number" id="brix-js" oninput="actualizarFormulario()" placeholder="Ingrese el valor de Brix JS">
+            <input type="number" id="brix-js" oninput="actualizarFormulario()">
         </div>
         <div class="form-group">
             <label for="unidades">Unidades:</label>
-            <input type="number" id="unidades" oninput="actualizarFormulario()" placeholder="Ingrese la cantidad de unidades">
+            <input type="number" id="unidades" oninput="actualizarFormulario()">
         </div>
         <div class="form-group">
-            <label for="volumen">Volumen de Jarabe Simple:</label>
+            <label for="volumen">Jarabe Simple a utilizar:</label>
             <input type="number" id="volumen" disabled>
         </div>
         <div class="form-group">
-            <label for="volumen-real">Volumen Real:</label>
-            <input type="number" id="volumen-real" oninput="actualizarFormulario()" placeholder="Ingrese el volumen real">
+            <label for="volumen-real">Volumen Real del Tanque:</label>
+            <input type="number" id="volumen-real" oninput="actualizarFormulario()">
         </div>
         <div class="form-group">
-            <label for="litros-faltantes">Litros Faltantes:</label>
+            <label for="litros-faltantes">Litros a ajustar</label>
             <input type="number" id="litros-faltantes" disabled>
         </div>
     </div>
+    <script>
+        for (let i = 0; i < 10; i++) {
+            let ghost = document.createElement("div");
+            ghost.classList.add("ghost");
+            ghost.style.left = Math.random() * 100 + "vw";
+            ghost.style.top = Math.random() * 100 + "vh";
+            ghost.style.animationDuration = Math.random() * 3 + 2 + "s";
+            document.body.appendChild(ghost);
+        }
+    </script>
 </body>
 </html>

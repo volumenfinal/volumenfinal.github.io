@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarabe Simple</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: darkred;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animación de burbujas */
+        @keyframes bubble {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        .bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: bubble 5s infinite;
+        }
+
+        .bubble:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(2) {
+            left: 20%;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(3) {
+            left: 30%;
+            animation-delay: 4s;
+        }
+
+        .bubble:nth-child(4) {
+            left: 40%;
+            animation-delay: 1s;
+        }
+
+        .bubble:nth-child(5) {
+            left: 50%;
+            animation-delay: 3s;
+        }
+
+        .bubble:nth-child(6) {
+            left: 60%;
+            animation-delay: 5s;
+        }
+
+        .bubble:nth-child(7) {
+            left: 70%;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(8) {
+            left: 80%;
+            animation-delay: 4s;
+        }
+
+        .bubble:nth-child(9) {
+            left: 90%;
+            animation-delay: 1s;
+        }
+
+        .bubble:nth-child(10) {
+            left: 100%;
+            animation-delay: 3s;
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        /* Barra de búsqueda */
+        #searchInput {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+        }
+
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Resultados */
+        #results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .result-item p {
+            margin: 5px 0;
+        }
+
+        .result-item button {
+            margin-right: 10px;
+            background: #ff5722;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .result-item button:hover {
+            background: #e64a19;
+        }
+
+        /* Notificaciones */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            display: none;
+            z-index: 2;
+        }
+
+        .notification.show {
+            display: block;
+            animation: fadeInOut 3s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            #searchInput {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animación de burbujas -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <h1>Jarabe simple</h1>
+        <input type="text" id="searchInput" placeholder="Ingrese el ID...">
+
+        <!-- Resultados -->
+        <div id="results"></div>
+
+        <!-- Notificación -->
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <!-- Firebase v9 (Módulo) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDVHMl5IzVCv11dKOjMlKIIOMnbBp5eHXE",
+            authDomain: "almacenar-de263.firebaseapp.com",
+            projectId: "almacenar-de263",
+            storageBucket: "almacenar-de263.firebasestorage.app",
+            messagingSenderId: "195901454057",
+            appId: "1:195901454057:web:84f0b639145157ee216278"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Referencia al campo de búsqueda
+        const searchInput = document.getElementById("searchInput");
+
+        // Escuchar cambios en el campo de búsqueda
+        searchInput.addEventListener("input", async () => {
+            const searchTerm = searchInput.value.trim();
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = "";
+
+            if (!searchTerm) return;
+
+            try {
+                const q = query(collection(db, "jarabesimple"), where("id", "==", searchTerm));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    resultsDiv.innerHTML = "<p>No se encontraron resultados.</p>";
+                    return;
+                }
+
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const itemDiv = document.createElement("div");
+                    itemDiv.className = "result-item";
+                    itemDiv.innerHTML = `
+                        <p>ID: ${data.id}</p>
+                        <p>Nombre: ${data.nombre}</p>
+                        <p>Kg de Azúcar: ${data.kgAz}</p>
+                        <button onclick="editData('${doc.id}')">Editar</button>
+                        <button onclick="deleteData('${doc.id}')">Eliminar</button>
+                    `;
+                    resultsDiv.appendChild(itemDiv);
+                });
+            } catch (error) {
+                console.error("Error al buscar:", error);
+                alert("Error al buscar: " + error.message);
+            }
+        });
+
+        // Función para eliminar datos
+        window.deleteData = async function(docId) {
+            try {
+                await deleteDoc(doc(db, "jarabesimple", docId));
+                showNotification("Eliminado correctamente");
+                searchInput.value = "";
+                document.getElementById("results").innerHTML = "";
+            } catch (error) {
+                console.error("Error al eliminar:", error);
+                alert("Error al eliminar: " + error.message);
+            }
+        };
+
+        // Función para editar datos
+        window.editData = async function(docId) {
+            const newNombre = prompt("Ingrese el nuevo nombre:");
+            const newKgAz = prompt("Ingrese los nuevos kg de azúcar:");
+
+            if (newNombre && newKgAz && !isNaN(newKgAz)) {
+                try {
+                    await updateDoc(doc(db, "jarabesimple", docId), {
+                        nombre: newNombre,
+                        kgAz: parseFloat(newKgAz)
+                    });
+                    showNotification("Guardado correctamente");
+                    searchInput.dispatchEvent(new Event("input"));
+                } catch (error) {
+                    console.error("Error al editar:", error);
+                    alert("Error al editar: " + error.message);
+                }
+            } else {
+                alert("Todos los campos son obligatorios y el azúcar debe ser un número válido.");
+            }
+        };
+
+        // Función para mostrar notificaciones
+        function showNotification(message) {
+            const notificationDiv = document.getElementById("notification");
+            notificationDiv.textContent = message;
+            notificationDiv.classList.add("show");
+            setTimeout(() => {
+                notificationDiv.classList.remove("show");
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

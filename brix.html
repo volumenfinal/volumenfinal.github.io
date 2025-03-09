@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta Automática</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: darkred;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        #volumen, #densidad {
+            display: none;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[readonly] {
+            background-color: #f9f9f9;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Consultar Brix</h1>
+        <form id="dataForm">
+            <div class="form-group">
+                <label for="abreviatura">Sabor</label>
+                <input type="text" id="abreviatura" name="abreviatura" required>
+            </div>
+            <div class="form-group">
+                <label for="nombre"></label>
+                <input type="text" id="nombre" name="nombre" readonly>
+            </div>
+            <div class="form-group">
+                <label for="volumen"></label>
+                <input type="number" id="volumen" name="volumen" readonly>
+            </div>
+            <div class="form-group">
+                <label for="densidad"></label>
+                <input type="number" id="densidad" name="densidad" readonly>
+            </div>
+            <div class="form-group">
+                <label for="brix">Brix:</label>
+                <input type="number" id="brix" name="brix" readonly>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        // Importa los módulos necesarios de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Configuración de Firebase (reemplaza con tus propios datos)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDVHMl5IzVCv11dKOjMlKIIOMnbBp5eHXE",
+            authDomain: "almacenar-de263.firebaseapp.com",
+            projectId: "almacenar-de263",
+            storageBucket: "almacenar-de263.firebasestorage.app",
+            messagingSenderId: "195901454057",
+            appId: "1:195901454057:web:84f0b639145157ee216278"
+        };
+
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Obtener referencias a los elementos del formulario
+        const abreviaturaInput = document.getElementById("abreviatura");
+        const nombreInput = document.getElementById("nombre");
+        const volumenInput = document.getElementById("volumen");
+        const densidadInput = document.getElementById("densidad");
+        const brixInput = document.getElementById("brix");
+
+        // Función para consultar la base de datos automáticamente
+        abreviaturaInput.addEventListener("input", async () => {
+            const abreviatura = abreviaturaInput.value.trim();
+
+            if (abreviatura.length === 0) {
+                // Limpiar los campos si no hay abreviatura
+                nombreInput.value = "";
+                volumenInput.value = "";
+                densidadInput.value = "";
+                brixInput.value = "";
+                return;
+            }
+
+            try {
+                // Consultar la base de datos
+                const q = query(collection(db, "jarabe"), where("abreviatura", "==", abreviatura));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    // Limpiar los campos si no se encuentra la abreviatura
+                    nombreInput.value = "";
+                    volumenInput.value = "";
+                    densidadInput.value = "";
+                    brixInput.value = "";
+                    return;
+                }
+
+                // Obtener el primer documento que coincida
+                const doc = querySnapshot.docs[0];
+                const data = doc.data();
+
+                // Autocompletar los campos del formulario
+                nombreInput.value = data.nombre || "";
+                volumenInput.value = data.volumen || "";
+                densidadInput.value = data.densidad || "";
+                brixInput.value = data.brix || "";
+            } catch (error) {
+                alert("Error al consultar la base de datos: " + error);
+            }
+        });
+    </script>
+</body>
+</html>

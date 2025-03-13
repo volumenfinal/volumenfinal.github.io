@@ -3,162 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Sabor</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="2.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="image.png">
-    <link rel="manifest" href="manifest.json">
+    <title>Registro de Jarabe Terminado</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            background-color: darkred;
             margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            background-color: darkred;
-            min-height: 100vh;
-        }
-        header {
-            background-color: darkred;
-            color: white;
-            text-align: center;
-            padding: 1rem;
-        }
-        main {
-            flex: 1;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            position: relative;
+            padding: 20px;
+        }
+        .bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bubble {
+            position: absolute;
+            bottom: -10px;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: rise 5s infinite ease-in;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100vh); opacity: 0; }
         }
         form {
-            background: #f9f9f9;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            width: 75%;
             max-width: 400px;
-            width: 100%;
         }
-        label {
+        label, input, button {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
+            width: 95%;
+            margin-bottom: 10px;
         }
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
+        input {
+            padding: 8px;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 5px;
         }
-        input[readonly] {
-            background-color: #e9ecef;
+        input:read-only {
+            background-color: #f0f0f0;
         }
         button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 0.75rem;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        footer {
             background-color: darkred;
             color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: brown;
+        }
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            color: green;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            font-size: 18px;
             text-align: center;
-            padding: 1rem;
-            margin-top: auto;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s;
+        }
+        .show {
+            opacity: 1;
+            visibility: visible;
         }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const litrosPorSabor = {
-                "CCF": 300,
-                "CC": 300,
-                "JDVM": 500.3,
-                "JDVC": 438.16,
-                "FRKH": 312.70,
-                "UVAH": 345,
-                "FSAH": 359.9,
-                "CSH": 359.9,
-                "FNH": 370.6,
-                "FP": 370.43,
-                "SPF": 312.57,
-                "PMB": 811.82,
-                "PFI4": 811.91,
-                "CCZ": 304.7,
-                "CCZB": 304.7,
-                "KL": 312.5,
-                "FTM": 500.1,
-                "FTL": 500.1,
-                "FTLB": 285.8,
-                "JDVN": 1378.4,
-                "PNI4": 811.90,
-                "FURYG": 500,
-                "FURYM": 500,
-                "SWMZ": 370.4,
-                "SWMA": 500,
-                "JDVG": 559.18,
-            };
-
-            function calcularTotal() {
-                const volumenInicial = parseFloat(document.getElementById('volumenInicial').value) || 0;
-                const volumenFinal = parseFloat(document.getElementById('volumenFinal').value) || 0;
-                const litros = parseFloat(document.getElementById('litros').value) || 1;
-
-                let total = 0;
-                if (volumenInicial && volumenFinal) {
-                    total = (volumenInicial - volumenFinal) / litros;
-                } else if (volumenInicial) {
-                    total = volumenInicial / litros;
-                } else if (volumenFinal) {
-                    total = volumenFinal / litros;
-                }
-
-                document.getElementById('total').value = isNaN(total) ? 0 : total.toFixed(2);
-            }
-
-            function actualizarLitros() {
-                const sabor = document.getElementById('sabor').value.toUpperCase();
-                const litros = litrosPorSabor[sabor] || 0;
-                document.getElementById('litros').value = litros;
-                calcularTotal();
-            }
-
-            document.getElementById('sabor').addEventListener('input', actualizarLitros);
-            document.getElementById('volumenInicial').addEventListener('input', calcularTotal);
-            document.getElementById('volumenFinal').addEventListener('input', calcularTotal);
-        });
-    </script>
 </head>
 <body>
-    <header>
-        <h1>Calcular Unidades</h1>
-    </header>
-    <main>
-        <form>
-            <label for="sabor">Sabor:</label>
-            <input type="text" id="sabor" placeholder="Ingresa el sabor" required>
+    <div class="bubbles"></div>
 
-            <label for="volumenInicial">Volumen Inicial:</label>
-            <input type="number" id="volumenInicial" required>
+    <div id="notification" class="notification">Datos guardados correctamente</div>
 
-            <label for="volumenFinal">Volumen Final:</label>
-            <input type="number" id="volumenFinal" required>
+    <form id="dataForm">
+        <h2>Calcular Unidades</h2>
+        <label>Sabor: <input type="text" id="abreviatura" required></label>
+        <label><input type="text" id="nombre" readonly></label>
+        <label>Litos por unidad: <input type="number" step="0.01" id="volumenFinal" readonly></label>
+        <label>Volumen inicial: <input type="number" step="0.01" id="volumenInicial"></label>
+        <label>Volumen final: <input type="number" step="0.01" id="volumen"></label>
+        <label>Unidades: <input type="number" step="0.01" id="unidades" readonly></label>
+    </form>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-            <label for="litros">Litros:</label>
-            <input type="number" id="litros" value="" readonly>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDVHMl5IzVCv11dKOjMlKIIOMnbBp5eHXE",
+            authDomain: "almacenar-de263.firebaseapp.com",
+            projectId: "almacenar-de263",
+            storageBucket: "almacenar-de263.firebasestorage.app",
+            messagingSenderId: "195901454057",
+            appId: "1:195901454057:web:84f0b639145157ee216278"
+        };
 
-            <label for="total">Unidades:</label>
-            <input type="text" id="total" readonly>
-        </form>
-    </main>
-    <footer>
-        <p>App hecha por Adonay 👻</p>
-    </footer>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Buscar datos al escribir en "Abreviatura"
+        document.getElementById("abreviatura").addEventListener("input", async (e) => {
+            const abreviatura = e.target.value.trim();
+            if (abreviatura) {
+                const querySnapshot = await getDocs(collection(db, "jarabe"));
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // Búsqueda insensible a mayúsculas/minúsculas
+                    if (data.abreviatura.toLowerCase() === abreviatura.toLowerCase()) {
+                        document.getElementById("nombre").value = data.nombre;
+                        document.getElementById("volumenFinal").value = data.volumen;
+                        calcularUnidades(); // Calcular unidades automáticamente
+                        return;
+                    }
+                });
+            }
+        });
+
+        // Calcular unidades automáticamente
+        const calcularUnidades = () => {
+            const volumenFinal = parseFloat(document.getElementById("volumenFinal").value);
+            const volumenInicial = parseFloat(document.getElementById("volumenInicial").value);
+            const volumen = parseFloat(document.getElementById("volumen").value);
+
+            if (isNaN(volumenFinal)) return; // No calcular si no hay volumen final
+
+            let unidades = 0;
+            if (!isNaN(volumenInicial)) {
+                if (!isNaN(volumen)) {
+                    unidades = (volumenInicial - volumen) / volumenFinal;
+                } else {
+                    unidades = volumenInicial / volumenFinal;
+                }
+            } else if (!isNaN(volumen)) {
+                unidades = volumen / volumenFinal;
+            }
+
+            document.getElementById("unidades").value = unidades.toFixed(2);
+        };
+
+        // Escuchar cambios en los campos de volumen
+        document.getElementById("volumenInicial").addEventListener("input", calcularUnidades);
+        document.getElementById("volumen").addEventListener("input", calcularUnidades);
+
+        // Animación de burbujas mejorada
+        function createBubbles() {
+            const bubbleContainer = document.querySelector(".bubbles");
+            const bubble = document.createElement("div");
+            bubble.classList.add("bubble");
+            bubble.style.left = Math.random() * 100 + "vw";
+            bubble.style.width = Math.random() * 20 + 10 + "px";
+            bubble.style.height = bubble.style.width;
+            bubble.style.animationDuration = Math.random() * 3 + 2 + "s";
+            bubble.style.opacity = Math.random() * 0.5 + 0.3;
+            bubbleContainer.appendChild(bubble);
+            setTimeout(() => bubble.remove(), 5000);
+        }
+        setInterval(createBubbles, 300); // Generar burbujas más frecuentemente
+    </script>
 </body>
 </html>

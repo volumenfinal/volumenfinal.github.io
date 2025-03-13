@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Jarabe Terminado</title>
     <style>
-        body {
+     body {
             background-color: darkred;
             margin: 0;
             overflow-y: auto;
@@ -157,26 +157,21 @@
                     return;
                 }
 
-                const q = query(collection(db, "jarabe"));
+                const q = query(collection(db, "jarabe"), where("abreviatura", "==", abreviatura));
                 const querySnapshot = await getDocs(q);
 
-                let encontrado = false;
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.abreviatura.toLowerCase() === abreviatura) { // Comparar en minúsculas
-                        document.getElementById("nombre").value = data.nombre;
-                        document.getElementById("volumenFinal").value = data.volumen; // Con decimales
-                        document.getElementById("brixFinal").value = data.brix; // Con decimales
-                        encontrado = true;
-                    }
-                });
-
-                if (!encontrado) {
+                if (querySnapshot.empty) {
                     showNotification("No se encontró ninguna coincidencia.");
                     document.getElementById("nombre").value = "";
                     document.getElementById("volumenFinal").value = "";
                     document.getElementById("brixFinal").value = "";
+                    return;
                 }
+
+                const doc = querySnapshot.docs[0].data();
+                document.getElementById("nombre").value = doc.nombre;
+                document.getElementById("volumenFinal").value = doc.volumen; // Con decimales
+                document.getElementById("brixFinal").value = doc.brix; // Con decimales
 
                 // Calcular y mostrar el volumen
                 calcularVolumen();

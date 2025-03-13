@@ -14,6 +14,8 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
+            position: relative;
         }
 
         .container {
@@ -21,17 +23,27 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            width: 90%;
+            max-width: 400px;
+            min-width: 280px;
+            z-index: 1;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        p {
+            font-size: 1rem;
+            text-align: center;
         }
 
         .form-group {
             margin-bottom: 15px;
         }
+
         #volumen, #densidad {
             display: none;
         }
@@ -53,12 +65,46 @@
             background-color: #f9f9f9;
             cursor: not-allowed;
         }
+
+        /* Animación de burbujas */
+        .burbuja {
+            position: absolute;
+            bottom: -100px;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: flotar 5s infinite ease-in;
+            max-width: 30px;
+            max-height: 30px;
+        }
+
+        @keyframes flotar {
+            0% {
+                bottom: -100px;
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(100px);
+            }
+            100% {
+                bottom: 100vh;
+                transform: translateX(-100px);
+            }
+        }
+
+        /* Media Queries para pantallas pequeñas */
+        @media (max-width: 600px) {
+            .burbuja {
+                max-width: 15px;
+                max-height: 15px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Consultar Brix</h1>
-         <p>Para consultar usa letras pequeñas :)</p>
+        <h1>Consultar Brix Final</h1>
         <form id="dataForm">
             <div class="form-group">
                 <label for="abreviatura">Sabor</label>
@@ -82,6 +128,25 @@
             </div>
         </form>
     </div>
+
+    <!-- Script para generar burbujas -->
+    <script>
+        function crearBurbuja() {
+            const burbuja = document.createElement("div");
+            burbuja.classList.add("burbuja");
+            burbuja.style.left = Math.random() * 100 + "vw";
+            burbuja.style.animationDuration = Math.random() * 5 + 3 + "s";
+            burbuja.style.width = Math.random() * 20 + 10 + "px";
+            burbuja.style.height = burbuja.style.width;
+            document.body.appendChild(burbuja);
+
+            setTimeout(() => {
+                burbuja.remove();
+            }, 8000);
+        }
+
+        setInterval(crearBurbuja, 500);
+    </script>
 
     <script type="module">
         // Importa los módulos necesarios de Firebase
@@ -111,7 +176,7 @@
 
         // Función para consultar la base de datos automáticamente
         abreviaturaInput.addEventListener("input", async () => {
-            const abreviatura = abreviaturaInput.value.trim();
+            const abreviatura = abreviaturaInput.value.trim().toLowerCase(); // Convertir a minúsculas
 
             if (abreviatura.length === 0) {
                 // Limpiar los campos si no hay abreviatura

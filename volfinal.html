@@ -3,167 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabla de jarabe terminado.</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="2.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="image.png">
-    <link rel="manifest" href="manifest.json">
+    <title>Consulta de Jarabe Terminado</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
             background-color: darkred;
-            color: white;
+            margin: 0;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            padding: 20px;
         }
-        h1 {
-            text-align: center;
-            color: white;
+        .bubbles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
         }
-        .form-group {
-            margin-bottom: 15px;
+        .bubble {
+            position: absolute;
+            bottom: -10px;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: rise 5s infinite ease-in;
         }
-        label {
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            width: 90%;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+        label, input, button {
             display: block;
-            margin-bottom: 5px;
+            width: 100%;
+            margin-bottom: 10px;
         }
         input {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
+            padding: 8px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            font-size: 16px;
         }
         input[readonly] {
             background-color: #f0f0f0;
         }
-        footer {
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            color: darkred;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            font-size: 16px;
             text-align: center;
-            margin-top: 20px;
-            font-size: 0.9em;
-            color: white;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s;
+            z-index: 2;
+        }
+        .notification.show {
+            opacity: 1;
+            visibility: visible;
         }
     </style>
 </head>
 <body>
-    <h1>Volumen Final</h1>
-    <form id="calculatorForm">
-        <div class="form-group">
-            <label for="abbreviation">Sabor:</label>
-            <input type="text" id="abbreviation" required>
-        </div>
-        <div class="form-group">
-            <label for="fullName"></label>
-            <input type="text" id="fullName" readonly>
-        </div>
-        <div class="form-group">
-            <label for="quantity">Litros:</label>
-            <input type="number" id="quantity" readonly>
-        </div>
-        <div class="form-group">
-            <label for="userQuantity">Unidad:</label>
-            <input type="number" id="userQuantity" required>
-        </div>
-        <div class="form-group">
-            <label for="additionalInfo">Brix Final:</label>
-            <input type="text" id="additionalInfo" readonly>
-        </div>
-        <div class="form-group">
-            <label for="result">Volumen Final:</label>
-            <input type="text" id="result" readonly>
-        </div>
-        <div class="form-group">
-            <label for="realVolume">Volumen Real:</label>
-            <input type="number" id="realVolume">
-        </div>
-        <div class="form-group">
-            <label for="margin">Margen:</label>
-            <input type="number" id="margin">
-        </div>
-        <div class="form-group">
-            <label for="waterVolume">Volumen de Agua:</label>
-            <input type="text" id="waterVolume" readonly>
-        </div>
+    <div class="bubbles"></div>
+
+    <!-- Notificación personalizada -->
+    <div id="notification" class="notification">No se encontró ninguna coincidencia</div>
+
+    <form id="dataForm">
+        <h2>Calcular Volumen De Agua</h2>
+        <label>Sabor: <input type="text" id="abreviatura" required></label>
+        <label><input type="text" id="nombre" readonly></label>
+        <label>Litros Por Unidad:<input type="number" step="0.01" id="volumenFinal" readonly></label>
+        <label>Brix Final: <input type="number" step="0.01" id="brixFinal" readonly></label>
+        <label>Unidades: <input type="number" step="0.01" id="unidad"></label>
+        <label>Volumen Final: <input type="number" step="0.01" id="volumen" readonly></label>
+        <label>Volumen Real Del Tanque: <input type="number" step="0.01" id="volumenReal"></label>
+        <label>Margen a Dejar: <input type="number" step="0.01" id="margen"></label>
+        <label>Agua a Dosificar: <input type="number" step="0.01" id="volumenRestante" readonly></label>
     </form>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    <footer>
-       App hecha por Adonay 👻
-    </footer>
-
-    <script>
-        const database = {
-            'CCF': { name: 'Coca-Cola Familiar', quantity: 300, info: '41.07' },
-            'CC': { name: 'Coca-Cola Clásica', quantity: 300, info: '54.85' },
-            'JDVC': { name: 'Jugo del valle citru Naranja', quantity: 438.16, info: '20.13' },
-            'FRKH': { name: 'Fresca Harmony', quantity: 312.70, info: '41.85' },
-            'UVAH': { name: 'Uva Harmony', quantity: 345, info: '37.56' },
-            'FSAH': { name: 'Fresa Harmony', quantity: 359.9, info: '36.11' },
-            'CSH': { name: 'Crema Soda Harmony', quantity: 359.9, info: '36.06' },
-            'FNH': { name: 'Fanta Naranja Harmony', quantity: 370.6, info: '44.26' },
-            'JDVM': { name: 'Jugo del valle Mandarina', quantity: 500.3, info: '40.05' },
-            'FP': { name: 'Fanta Piña', quantity: 370.43, info: '23.09' },
-            'SPF': { name: 'Sprite Fenix', quantity: 312.57, info: '28.96' },
-            'PMB': { name: 'Powerade Mountain Blast', quantity: 811.82, info: '15.88' },
-            'PFI4': { name: 'Powerade Frutas Ion 4', quantity: 811.91, info: '21.76' },
-            'CCZ': { name: 'Coca-Cola Zero', quantity: 304.7, info: '0' },
-            'CCZB': { name: 'Coca-Cola Zero B&B', quantity: 304.7, info: '0' },
-            'KL': { name: 'Kinley Soda', quantity: 312.5, info: '0' },
-            'FTM': { name: 'Fuze Tea Melocotón', quantity: 500.1, info: '23.48' },
-            'FTL': { name: 'Fuze Tea Limón', quantity: 500.1, info: '23.46' },
-            'FTLB': { name: 'Fuze Tea Limón B&B', quantity: 285.8, info: '38.22' },
-            'JDVN': { name: 'Jugo del valle Naranja', quantity: 1378.4, info: '27.49' },
-            'PNI4': { name: 'Powerade Naranja Mandarina Ion 4', quantity: 811.90, info: '21.75' },
-            'FURYG': { name: 'Fury Gold', quantity: 500, info: '40.7' },
-            'FURYM': { name: 'Fury Mean Green', quantity: 500, info: '39.6' },
-            'SWMZ': { name: 'Cristal Manzana', quantity: 370.4, info: '0' },
-            'SWMA': { name: 'Cristal Mandarina', quantity: 500, info: '0' },
-            'JDVG': { name: 'Jugo del valle Guayaba', quantity: 559.18, info: '37.35' },
+        const firebaseConfig = {
+            apiKey: "AIzaSyDVHMl5IzVCv11dKOjMlKIIOMnbBp5eHXE",
+            authDomain: "almacenar-de263.firebaseapp.com",
+            projectId: "almacenar-de263",
+            storageBucket: "almacenar-de263.firebasestorage.app",
+            messagingSenderId: "195901454057",
+            appId: "1:195901454057:web:84f0b639145157ee216278"
         };
 
-        document.getElementById('abbreviation').addEventListener('blur', function() {
-            const abbr = this.value.toUpperCase();
-            const data = database[abbr];
-            if (data) {
-                document.getElementById('fullName').value = data.name;
-                document.getElementById('quantity').value = data.quantity;
-                document.getElementById('additionalInfo').value = data.info;
-                calculateFinalVolume();
-            } else {
-                alert('Abreviatura no encontrada');
-                document.getElementById('fullName').value = '';
-                document.getElementById('quantity').value = '';
-                document.getElementById('additionalInfo').value = '';
-                document.getElementById('result').value = '';
-                document.getElementById('waterVolume').value = '';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let timeoutId; // Para manejar el retraso en la búsqueda
+
+        // Función para mostrar la notificación
+        function showNotification(message) {
+            const notification = document.getElementById("notification");
+            notification.textContent = message;
+            notification.classList.add("show");
+            setTimeout(() => {
+                notification.classList.remove("show");
+            }, 3000); // La notificación desaparece después de 3 segundos
+        }
+
+        // Función para eliminar decimales de un número
+        function eliminarDecimales(value) {
+            return Math.floor(value); // Elimina la parte decimal
+        }
+
+        // Función para buscar la abreviatura en Firebase automáticamente
+        document.getElementById("abreviatura").addEventListener("input", async (e) => {
+            const abreviatura = e.target.value.trim();
+
+            // Limpiar el timeout anterior
+            if (timeoutId) {
+                clearTimeout(timeoutId);
             }
+
+            // Esperar 500ms después de que el usuario deje de escribir
+            timeoutId = setTimeout(async () => {
+                if (!abreviatura) {
+                    // Limpiar campos si no hay abreviatura
+                    document.getElementById("nombre").value = "";
+                    document.getElementById("volumenFinal").value = "";
+                    document.getElementById("brixFinal").value = "";
+                    return;
+                }
+
+                const q = query(collection(db, "jarabe"), where("abreviatura", "==", abreviatura));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    showNotification("No se encontró ninguna coincidencia.");
+                    document.getElementById("nombre").value = "";
+                    document.getElementById("volumenFinal").value = "";
+                    document.getElementById("brixFinal").value = "";
+                    return;
+                }
+
+                const doc = querySnapshot.docs[0].data();
+                document.getElementById("nombre").value = doc.nombre;
+                document.getElementById("volumenFinal").value = doc.volumen; // Con decimales
+                document.getElementById("brixFinal").value = doc.brix; // Con decimales
+
+                // Calcular y mostrar el volumen
+                calcularVolumen();
+            }, 500); // Retraso de 500ms
         });
 
-        document.getElementById('userQuantity').addEventListener('input', calculateFinalVolume);
-        document.getElementById('realVolume').addEventListener('input', calculateWaterVolume);
-        document.getElementById('margin').addEventListener('input', calculateWaterVolume);
+        // Función para calcular el volumen y el volumen restante
+        function calcularVolumen() {
+            const volumenFinal = parseFloat(document.getElementById("volumenFinal").value);
+            const unidad = parseFloat(document.getElementById("unidad").value);
+            const volumenReal = parseFloat(document.getElementById("volumenReal").value);
+            const margen = parseFloat(document.getElementById("margen").value);
 
-        function calculateFinalVolume() {
-            const quantity = parseFloat(document.getElementById('quantity').value);
-            const userQuantity = parseFloat(document.getElementById('userQuantity').value);
+            if (!isNaN(volumenFinal) && !isNaN(unidad)) {
+                const volumen = volumenFinal * unidad;
+                document.getElementById("volumen").value = eliminarDecimales(volumen); // Sin decimales
+            }
 
-            if (!isNaN(quantity) && !isNaN(userQuantity)) {
-                const finalVolume = Math.round(quantity * userQuantity);
-                document.getElementById('result').value = finalVolume;
-                calculateWaterVolume();
+            if (!isNaN(volumenFinal) && !isNaN(unidad) && !isNaN(volumenReal) && !isNaN(margen)) {
+                const volumenRestante = (volumenFinal * unidad) - volumenReal - margen;
+                document.getElementById("volumenRestante").value = eliminarDecimales(volumenRestante); // Sin decimales
             }
         }
 
-        function calculateWaterVolume() {
-            const finalVolume = parseInt(document.getElementById('result').value, 10);
-            const realVolume = parseInt(document.getElementById('realVolume').value, 10);
-            const margin = parseInt(document.getElementById('margin').value, 10);
+        // Escuchar cambios en los campos de entrada para calcular automáticamente
+        document.getElementById("unidad").addEventListener("input", calcularVolumen);
+        document.getElementById("volumenReal").addEventListener("input", calcularVolumen);
+        document.getElementById("margen").addEventListener("input", calcularVolumen);
 
-            if (!isNaN(finalVolume) && !isNaN(realVolume) && !isNaN(margin)) {
-                const waterVolume = finalVolume - realVolume - margin;
-                document.getElementById('waterVolume').value = waterVolume;
+        // Función para crear burbujas decorativas
+        function createBubbles() {
+            const bubbleContainer = document.querySelector(".bubbles");
+            for (let i = 0; i < 20; i++) {
+                let bubble = document.createElement("div");
+                bubble.classList.add("bubble");
+                bubble.style.left = Math.random() * 100 + "vw";
+                bubble.style.animationDuration = (Math.random() * 3 + 2) + "s";
+                bubbleContainer.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 5000);
             }
         }
+        setInterval(createBubbles, 500);
     </script>
 </body>
 </html>

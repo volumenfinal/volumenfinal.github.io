@@ -215,14 +215,14 @@
     <!-- Firebase v9 (Módulo) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs, doc, deleteDoc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDVHMl5IzVCv11dKOjMlKIIOMnbBp5eHXE",
             authDomain: "almacenar-de263.firebaseapp.com",
             projectId: "almacenar-de263",
-            storageBucket: "almacenar-de263.firebasestorage.app",
+            storageBucket: "almacenar-de263.appspot.com",
             messagingSenderId: "195901454057",
             appId: "1:195901454057:web:84f0b639145157ee216278"
         };
@@ -236,7 +236,7 @@
 
         // Escuchar cambios en el campo de búsqueda
         searchInput.addEventListener("input", async () => {
-            const searchTerm = searchInput.value.trim();
+            const searchTerm = searchInput.value.trim().toLowerCase(); // Convertir a minúsculas
             const resultsDiv = document.getElementById("results");
             resultsDiv.innerHTML = "";
 
@@ -246,6 +246,8 @@
                 const q = query(collection(db, "jarabe"), where("abreviatura", "==", searchTerm));
                 const querySnapshot = await getDocs(q);
 
+                console.log("QuerySnapshot:", querySnapshot); // Depuración
+
                 if (querySnapshot.empty) {
                     resultsDiv.innerHTML = "<p>No se encontraron resultados.</p>";
                     return;
@@ -253,6 +255,7 @@
 
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
+                    console.log("Document data:", data); // Depuración
                     const itemDiv = document.createElement("div");
                     itemDiv.className = "result-item";
                     itemDiv.innerHTML = `

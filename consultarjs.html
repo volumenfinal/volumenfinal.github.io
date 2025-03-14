@@ -32,6 +32,7 @@
             text-align: center;
             color: #fff;
             margin-bottom: 20px;
+            font-size: 2rem; /* Tamaño de fuente más grande para títulos */
         }
 
         /* Barra de búsqueda */
@@ -43,6 +44,7 @@
             background: rgba(255, 255, 255, 0.2);
             color: white;
             font-size: 16px;
+            box-sizing: border-box; /* Asegura que el padding no afecte el ancho total */
         }
 
         #searchInput::placeholder {
@@ -69,10 +71,11 @@
             margin-right: 10px;
             background: #ff5722;
             border: none;
-            padding: 5px 10px;
+            padding: 8px 15px; /* Botones más grandes para facilitar el clic */
             border-radius: 5px;
             color: white;
             cursor: pointer;
+            font-size: 14px; /* Tamaño de fuente adecuado para móviles */
         }
 
         .result-item button:hover {
@@ -111,10 +114,34 @@
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
+                margin: 10px; /* Menos margen en móviles */
+            }
+
+            h1 {
+                font-size: 1.5rem; /* Tamaño de fuente más pequeño en móviles */
             }
 
             #searchInput {
                 font-size: 14px;
+            }
+
+            .result-item button {
+                padding: 6px 12px; /* Botones más pequeños en móviles */
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2rem; /* Tamaño de fuente aún más pequeño en pantallas muy pequeñas */
+            }
+
+            .result-item {
+                padding: 10px; /* Menos padding en móviles */
+            }
+
+            .result-item button {
+                margin-right: 5px; /* Menos espacio entre botones en móviles */
             }
         }
     </style>

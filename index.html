@@ -67,16 +67,26 @@
             border-radius: 5px;
             text-align: center;
         }
+        
+        .loading {
+            font-size: 1.5rem;
+            margin: 20px;
+        }
     </style>
 </head>
 <body>
-
-    <div class="login-box">
-        <h2>Iniciar sesión</h2>
-        <input type="text" id="username" placeholder="Usuario">
-        <input type="password" id="password" placeholder="Contraseña">
-        <button onclick="login()">Ingresar</button>
-        <div id="notification"></div>
+    <div id="login-container">
+        <div class="login-box">
+            <h2>Iniciar sesión</h2>
+            <input type="text" id="username" placeholder="Usuario">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button onclick="login()">Ingresar</button>
+            <div id="notification"></div>
+        </div>
+    </div>
+    
+    <div id="loading-container" class="loading" style="display: none;">
+        Verificando sesión...
     </div>
 
     <!-- Firebase SDK -->
@@ -101,33 +111,38 @@
 
         console.log("Firebase inicializado correctamente.");
 
-        // Verificar si hay credenciales guardadas
-        if (localStorage.getItem("username")) {
-            document.getElementById("username").value = localStorage.getItem("username");
-            document.getElementById("password").value = localStorage.getItem("password");
-        }
+        // Mostrar carga y ocultar formulario mientras verificamos
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('loading-container').style.display = 'block';
 
-        // Función de login sin verificación de sesión activa
-        window.login = function () {
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const email = username + "@example.com";
+        // Verificar estado de autenticación
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Usuario ya autenticado, redirigir según rol
+                console.log("Usuario ya autenticado:", user.uid);
+                checkUserRoleAndRedirect(user.uid);
+            } else {
+                // No hay usuario autenticado, mostrar formulario
+                console.log("No hay usuario autenticado");
+                document.getElementById('loading-container').style.display = 'none';
+                document.getElementById('login-container').style.display = 'block';
+                
+                // Cargar credenciales guardadas si existen
+                if (localStorage.getItem("username")) {
+                    document.getElementById("username").value = localStorage.getItem("username");
+                    document.getElementById("password").value = localStorage.getItem("password");
+                }
+            }
+        });
 
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log("Inicio de sesión exitoso:", user.uid);
-
-                    // Obtener datos del usuario desde Firestore
-                    return db.collection("users").doc(user.uid).get();
-                })
+        // Función para verificar rol y redirigir
+        function checkUserRoleAndRedirect(uid) {
+            db.collection("users").doc(uid).get()
                 .then((doc) => {
                     if (doc.exists) {
                         const userData = doc.data();
                         console.log("Usuario obtenido de Firestore:", userData);
-                        localStorage.setItem("loggedIn", "true");
-                        localStorage.setItem("username", username);
-
+                        
                         // Redirigir según el rol del usuario
                         if (userData.role === "admin") {
                             window.location.href = "admin.html";
@@ -139,6 +154,31 @@
                     }
                 })
                 .catch((error) => {
+                    console.error("Error al obtener datos del usuario:", error);
+                    // Mostrar formulario si hay error
+                    document.getElementById('loading-container').style.display = 'none';
+                    document.getElementById('login-container').style.display = 'block';
+                    showNotification("Error al verificar datos de usuario. Por favor inicie sesión.");
+                });
+        }
+
+        // Función de login
+        window.login = function () {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const email = username + "@example.com";
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("Inicio de sesión exitoso:", user.uid);
+                    localStorage.setItem("username", username);
+                    localStorage.setItem("password", password);
+                    
+                    // Verificar rol y redirigir
+                    checkUserRoleAndRedirect(user.uid);
+                })
+                .catch((error) => {
                     console.error("Error en el proceso de login:", error);
                     showNotification("Error: usuario y contraseña no válido.");
                 });
@@ -146,15 +186,12 @@
 
         // Función de cerrar sesión
         window.logout = function () {
-            const user = auth.currentUser;
-            if (user) {
-                auth.signOut()
-                    .then(() => {
-                        localStorage.removeItem("loggedIn");
-                        localStorage.removeItem("username");
-                        window.location.href = "index.html";
-                    });
-            }
+            auth.signOut()
+                .then(() => {
+                    localStorage.removeItem("username");
+                    localStorage.removeItem("password");
+                    window.location.href = "index.html";
+                });
         };
 
         function showNotification(message) {

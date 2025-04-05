@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú Principal</title>
+    <title>Menú Principal Administrador</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="2.png">
     <link rel="apple-touch-icon" sizes="180x180" href="image.png">
@@ -253,6 +253,7 @@
             <button onclick="redirectWithLoading('consultarjs.html')">Consultar JS</button>
             <button onclick="redirectWithLoading('registrar u.html')">Registrar Usuarios</button>
             <button onclick="redirectWithLoading('consultar.html')">Consultar Usuarios</button>
+            <!-- Resto de tus botones... -->
         </div>
     </main>
     <footer>
@@ -261,12 +262,32 @@
 
     <div id="loadingScreen">Cargando...</div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
     <script>
+        // Configuración de Firebase (DEBE SER IDÉNTICA A LA DE INDEX.HTML)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxV9tCHCPocCuacKYmZMAAaYJAoG5xoOA",
+            authDomain: "jarabe-34dd4.firebaseapp.com",
+            projectId: "jarabe-34dd4",
+            storageBucket: "jarabe-34dd4.firebasestorage.app",
+            messagingSenderId: "641991757108",
+            appId: "1:641991757108:web:bdb5a4a5cacd858f55e961",
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
         document.addEventListener("DOMContentLoaded", function () {
-            const isLoggedIn = localStorage.getItem("loggedIn");
-            if (!isLoggedIn || isLoggedIn !== "true") {
-                window.location.href = "index.html";
-            }
+            // Verificar autenticación con Firebase
+            auth.onAuthStateChanged((user) => {
+                if (!user) {
+                    window.location.href = "index.html";
+                }
+            });
         });
 
         function redirectWithLoading(targetUrl) {
@@ -285,15 +306,22 @@
         }
 
         function logout() {
-            localStorage.removeItem("loggedIn");
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 500);
-        }
-
-        function login() {
-            localStorage.setItem("loggedIn", "true");
-            window.location.href = "index.html";
+            // Mostrar pantalla de carga
+            showLoadingScreen(() => {
+                // Cerrar sesión en Firebase y luego redirigir
+                auth.signOut()
+                    .then(() => {
+                        // Limpiar credenciales locales
+                        localStorage.removeItem("username");
+                        localStorage.removeItem("password");
+                        // Redirigir con parámetro para evitar bucle
+                        window.location.href = "index.html?logout=true";
+                    })
+                    .catch((error) => {
+                        console.error("Error al cerrar sesión:", error);
+                        window.location.href = "index.html?logout=true";
+                    });
+            });
         }
     </script>
 </body>

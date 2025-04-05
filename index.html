@@ -117,13 +117,14 @@
 
         // Verificar estado de autenticación
         auth.onAuthStateChanged((user) => {
-            if (user) {
+            if (user && !window.location.search.includes('logout=true')) {
                 // Usuario ya autenticado, redirigir según rol
                 console.log("Usuario ya autenticado:", user.uid);
                 checkUserRoleAndRedirect(user.uid);
             } else {
-                // No hay usuario autenticado, mostrar formulario
+                // No hay usuario autenticado o es un logout
                 console.log("No hay usuario autenticado");
+                window.history.replaceState({}, document.title, window.location.pathname);
                 document.getElementById('loading-container').style.display = 'none';
                 document.getElementById('login-container').style.display = 'block';
                 
@@ -181,16 +182,6 @@
                 .catch((error) => {
                     console.error("Error en el proceso de login:", error);
                     showNotification("Error: usuario y contraseña no válido.");
-                });
-        };
-
-        // Función de cerrar sesión
-        window.logout = function () {
-            auth.signOut()
-                .then(() => {
-                    localStorage.removeItem("username");
-                    localStorage.removeItem("password");
-                    window.location.href = "index.html";
                 });
         };
 

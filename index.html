@@ -11,82 +11,441 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
-        body {
+        /* Estilos base */
+        * {
+            box-sizing: border-box;
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: darkred;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             color: white;
+            overflow: hidden;
+            position: relative;
+            padding: 20px;
         }
 
-        .login-box {
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 2rem;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
+        /* Burbujas animadas - optimizadas para móvil */
+        .bubbles {
+            position: absolute;
             width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            top: 0;
+            left: 0;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: rise 15s infinite ease-in;
+        }
+
+        /* Tamaños de burbujas más pequeños para móvil */
+        .bubble:nth-child(1) {
+            width: 30px;
+            height: 30px;
+            left: 10%;
+            animation-duration: 8s;
+        }
+
+        .bubble:nth-child(2) {
+            width: 15px;
+            height: 15px;
+            left: 20%;
+            animation-duration: 5s;
+            animation-delay: 1s;
+        }
+
+        .bubble:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            left: 35%;
+            animation-duration: 7s;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(4) {
+            width: 60px;
+            height: 60px;
+            left: 50%;
+            animation-duration: 11s;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(5) {
+            width: 25px;
+            height: 25px;
+            left: 55%;
+            animation-duration: 6s;
+            animation-delay: 1s;
+        }
+
+        .bubble:nth-child(6) {
+            width: 35px;
+            height: 35px;
+            left: 65%;
+            animation-duration: 8s;
+            animation-delay: 3s;
+        }
+
+        .bubble:nth-child(7) {
+            width: 20px;
+            height: 20px;
+            left: 75%;
+            animation-duration: 7s;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(8) {
+            width: 60px;
+            height: 60px;
+            left: 80%;
+            animation-duration: 6s;
+            animation-delay: 1s;
+        }
+
+        @keyframes rise {
+            0% {
+                bottom: -100px;
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(50px);
+            }
+            100% {
+                bottom: 1080px;
+                transform: translateX(-100px);
+            }
+        }
+
+        /* Contenedor principal responsivo */
+        .login-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 400px;
+            padding: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Caja de login responsiva */
+        .login-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+
+        .login-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .login-box h2 {
+            margin-bottom: 1.2rem;
+            font-size: 1.5rem;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Logo/imagen responsivo */
+        .logo-container {
+            margin-bottom: 1.2rem;
+        }
+
+        .logo-container img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Campos de entrada responsivos */
+        .input-group {
+            margin-bottom: 1.2rem;
+            position: relative;
         }
 
         .login-box input {
-            width: 90%;
+            width: 100%;
             padding: 0.8rem;
-            margin: 0.5rem 0;
-            border-radius: 4px;
+            padding-left: 40px;
+            margin: 0.3rem 0;
+            border-radius: 25px;
             border: none;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
         }
 
+        .login-box input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Botón responsivo */
         .login-box button {
             width: 100%;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            background-color: red;
+            padding: 0.8rem;
+            margin: 0.3rem 0;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(255, 75, 43, 0.4);
         }
 
         .login-box button:hover {
-            background-color: darkred;
+            background: linear-gradient(45deg, #ff4b2b, #ff416c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 75, 43, 0.6);
         }
 
+        /* Notificación responsiva */
         #notification {
             display: none;
-            margin-top: 10px;
-            padding: 10px;
-            background-color: black;
-            border-radius: 5px;
+            margin-top: 0.8rem;
+            padding: 0.7rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 25px;
+            text-align: center;
+            animation: shake 0.5s ease;
+            font-size: 0.9rem;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-3px); }
+            40%, 80% { transform: translateX(3px); }
+        }
+
+        /* Loading responsivo */
+        .loading {
+            font-size: 1.1rem;
+            margin: 15px;
+            color: white;
+            position: relative;
+            z-index: 1;
+            display: none;
             text-align: center;
         }
-        
-        .loading {
-            font-size: 1.5rem;
-            margin: 20px;
+
+        .loading:after {
+            content: '...';
+            position: absolute;
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* Efecto de neón responsivo */
+        .neon-text {
+            animation: flicker 1.5s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow:
+                    0 0 3px #fff,
+                    0 0 8px #fff,
+                    0 0 14px #fff,
+                    0 0 30px #ff4b2b,
+                    0 0 60px #ff4b2b,
+                    0 0 70px #ff4b2b,
+                    0 0 80px #ff4b2b,
+                    0 0 120px #ff4b2b;
+            }
+            20%, 24%, 55% {        
+                text-shadow: none;
+            }
+        }
+
+        /* Media Queries para diferentes tamaños de pantalla */
+        @media (min-width: 768px) {
+            /* Estilos para tablets y pantallas más grandes */
+            .login-container {
+                padding: 2rem;
+            }
+
+            .login-box {
+                padding: 2rem;
+                border-radius: 20px;
+            }
+
+            .login-box h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .logo-container img {
+                width: 100px;
+                height: 100px;
+            }
+
+            .input-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .login-box input {
+                padding: 1rem;
+                padding-left: 45px;
+                font-size: 1rem;
+                border-radius: 30px;
+            }
+
+            .login-box button {
+                padding: 1rem;
+                font-size: 1rem;
+                border-radius: 30px;
+            }
+
+            #notification {
+                padding: 0.8rem;
+                font-size: 1rem;
+            }
+
+            .loading {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (min-width: 992px) {
+            /* Estilos para pantallas grandes */
+            .login-box {
+                padding: 2.5rem;
+            }
+
+            .login-box h2 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Ajustes para pantallas muy pequeñas */
+        @media (max-width: 360px) {
+            .login-box {
+                padding: 1.2rem;
+            }
+
+            .login-box h2 {
+                font-size: 1.3rem;
+            }
+
+            .logo-container img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .login-box input {
+                padding: 0.7rem;
+                padding-left: 35px;
+                font-size: 0.8rem;
+            }
+
+            .input-icon {
+                left: 10px;
+                font-size: 0.8rem;
+            }
+
+            .login-box button {
+                padding: 0.7rem;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="login-container">
+    <!-- Burbujas animadas -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div id="login-container" class="login-container">
         <div class="login-box">
-            <h2>Iniciar sesión</h2>
-            <input type="text" id="username" placeholder="Usuario">
-            <input type="password" id="password" placeholder="Contraseña">
+            <!-- Logo/imagen -->
+            <div class="logo-container">
+                <img src="logo2.png" alt="Logo" id="login-logo">
+            </div>
+            
+            <h2 class="neon-text">Iniciar sesión</h2>
+            
+            <div class="input-group">
+                <span class="input-icon">👤</span>
+                <input type="text" id="username" placeholder="Usuario">
+            </div>
+            
+            <div class="input-group">
+                <span class="input-icon">🔒</span>
+                <input type="password" id="password" placeholder="Contraseña">
+            </div>
+            
             <button onclick="login()">Ingresar</button>
             <div id="notification"></div>
         </div>
     </div>
     
     <div id="loading-container" class="loading" style="display: none;">
-        Por favor espere, estamos validando se nos olvido 🐟...
+        Cargando datos...........
     </div>
 
     <!-- Firebase SDK -->

@@ -3,188 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Jarabe Terminado</title>
+    <title>Calcular Unidades</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="2.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="image.png">
+    <link rel="manifest" href="manifest.json">
     <style>
-        body {
-            background-color: darkred;
+        :root {
+            --primary: #4ECDC4;
+            --secondary: #FFE66D;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --accent: #FF6B6B;
+            --bg-gradient: linear-gradient(135deg, var(--dark), #3a4750);
+        }
+        
+        * {
+            box-sizing: border-box;
             margin: 0;
-            overflow: hidden;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--light);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-            position: relative;
+            min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
-        .bubbles {
-            position: absolute;
+        
+        .form-container {
+            background: rgba(41, 47, 54, 0.95);
+            padding: 25px;
+            border-radius: 15px;
             width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 0;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.8s ease-out;
         }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 {
+            color: var(--secondary);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: clamp(1.5rem, 4vw, 1.75rem);
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: clamp(0.75rem, 3vw, 0.875rem);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(247, 255, 247, 0.1);
+            color: var(--light);
+            font-size: clamp(0.875rem, 4vw, 1rem);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            background-color: rgba(247, 255, 247, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2);
+        }
+        
+        .form-group input:disabled {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--secondary);
+            font-weight: 600;
+            cursor: not-allowed;
+        }
+        
+        .result-box {
+            background: rgba(255, 230, 109, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 25px;
+            border: 1px solid var(--secondary);
+            text-align: center;
+        }
+        
+        .result-label {
+            font-size: clamp(0.875rem, 4vw, 1rem);
+            color: var(--secondary);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .result-value {
+            font-size: clamp(1.25rem, 5vw, 1.5rem);
+            font-weight: 700;
+            color: var(--light);
+        }
+        
         .bubble {
             position: absolute;
-            bottom: -10px;
-            width: 20px;
-            height: 20px;
-            background-color: rgba(255, 255, 255, 0.5);
+            background: rgba(78, 205, 196, 0.15);
             border-radius: 50%;
-            animation: rise 5s infinite ease-in;
+            animation: float 8s infinite ease-in-out;
+            z-index: -1;
         }
-        @keyframes rise {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100vh); opacity: 0; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
         }
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-            width: 75%;
-            max-width: 400px;
-        }
-        label, input, button {
-            display: block;
-            width: 95%;
-            margin-bottom: 10px;
-        }
-        input {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        input:read-only {
-            background-color: #f0f0f0;
-        }
-        button {
-            background-color: darkred;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: brown;
-        }
-        .notification {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            color: green;
-            padding: 15px 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            font-size: 18px;
-            text-align: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease-in-out, visibility 0.5s;
-        }
-        .show {
-            opacity: 1;
-            visibility: visible;
+        
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 20px 15px;
+            }
+            
+            .form-group input {
+                padding: 10px 12px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="bubbles"></div>
-
-    <div id="notification" class="notification">Datos guardados correctamente</div>
-
-    <form id="dataForm">
+    <div class="form-container">
         <h2>Calcular Unidades</h2>
-        <label>Sabor: <input type="text" id="abreviatura" required></label>
-        <label><input type="text" id="nombre" readonly></label>
-        <label>Litos por unidad: <input type="number" step="0.01" id="volumenFinal" readonly></label>
-        <label>Volumen inicial: <input type="number" step="0.01" id="volumenInicial"></label>
-        <label>Volumen final: <input type="number" step="0.01" id="volumen"></label>
-        <label>Unidades: <input type="number" step="0.01" id="unidades" readonly></label>
-    </form>
+        <div class="form-group">
+            <label for="abreviatura">Sabor:</label>
+            <input type="text" id="abreviatura" placeholder="Ej: CC" required>
+        </div>
+        <div class="form-group">
+            <label for="nombre"></label>
+            <input type="text" id="nombre" disabled>
+        </div>
+        <div class="form-group">
+            <label for="volumenFinal">Litros por unidad:</label>
+            <input type="number" step="0.01" id="volumenFinal" disabled>
+        </div>
+        <div class="form-group">
+            <label for="volumenInicial">Volumen inicial:</label>
+            <input type="number" step="0.01" id="volumenInicial" placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label for="volumen">Volumen final:</label>
+            <input type="number" step="0.01" id="volumen" placeholder="0.00">
+        </div>
+        
+        <div class="result-box">
+            <div class="result-label">Unidades calculadas:</div>
+            <div class="result-value" id="unidades">-</div>
+        </div>
+    </div>
     
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
+    <script>
+        // Configuración Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDVHMl5IzVCv11dKOjMlKIIOMnbBp5eHXE",
             authDomain: "almacenar-de263.firebaseapp.com",
             projectId: "almacenar-de263",
-            storageBucket: "almacenar-de263.firebasestorage.app",
+            storageBucket: "almacenar-de263.appspot.com",
             messagingSenderId: "195901454057",
             appId: "1:195901454057:web:84f0b639145157ee216278"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        // Buscar datos al escribir en "Abreviatura"
-        document.getElementById("abreviatura").addEventListener("input", async (e) => {
-            const abreviatura = e.target.value.trim();
-            if (abreviatura) {
-                const querySnapshot = await getDocs(collection(db, "jarabe"));
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    // Búsqueda insensible a mayúsculas/minúsculas
-                    if (data.abreviatura.toLowerCase() === abreviatura.toLowerCase()) {
-                        document.getElementById("nombre").value = data.nombre;
-                        document.getElementById("volumenFinal").value = data.volumen;
-                        calcularUnidades(); // Calcular unidades automáticamente
-                        return;
-                    }
-                });
+        // Elementos del formulario
+        const abreviaturaInput = document.getElementById('abreviatura');
+        const nombreInput = document.getElementById('nombre');
+        const volumenFinalInput = document.getElementById('volumenFinal');
+        const volumenInicialInput = document.getElementById('volumenInicial');
+        const volumenInput = document.getElementById('volumen');
+        const unidadesResult = document.getElementById('unidades');
+
+        // Escuchar cambios en los campos
+        abreviaturaInput.addEventListener('input', buscarSabor);
+        volumenInicialInput.addEventListener('input', calcularUnidades);
+        volumenInput.addEventListener('input', calcularUnidades);
+
+        // Buscar sabor en Firebase
+        async function buscarSabor() {
+            const abreviatura = abreviaturaInput.value.trim().toLowerCase();
+            
+            if (!abreviatura) {
+                nombreInput.value = "";
+                volumenFinalInput.value = "";
+                unidadesResult.textContent = "-";
+                return;
             }
-        });
+            
+            try {
+                const snapshot = await db.collection("jarabe").where("abreviatura", "==", abreviatura).get();
+                
+                if (!snapshot.empty) {
+                    const data = snapshot.docs[0].data();
+                    nombreInput.value = data.nombre || "Nombre no disponible";
+                    volumenFinalInput.value = data.volumen || "";
+                    calcularUnidades();
+                } else {
+                    nombreInput.value = "Sabor no encontrado";
+                    volumenFinalInput.value = "";
+                    unidadesResult.textContent = "-";
+                }
+            } catch (error) {
+                console.error("Error obteniendo datos: ", error);
+                nombreInput.value = "Error en la búsqueda";
+            }
+        }
 
-        // Calcular unidades automáticamente
-        const calcularUnidades = () => {
-            const volumenFinal = parseFloat(document.getElementById("volumenFinal").value);
-            const volumenInicial = parseFloat(document.getElementById("volumenInicial").value);
-            const volumen = parseFloat(document.getElementById("volumen").value);
+        // Calcular unidades
+        function calcularUnidades() {
+            const volumenFinal = parseFloat(volumenFinalInput.value);
+            const volumenInicial = parseFloat(volumenInicialInput.value) || 0;
+            const volumen = parseFloat(volumenInput.value) || 0;
 
-            if (isNaN(volumenFinal)) return; // No calcular si no hay volumen final
+            if (isNaN(volumenFinal) || volumenFinal <= 0) {
+                unidadesResult.textContent = "-";
+                return;
+            }
 
             let unidades = 0;
-            if (!isNaN(volumenInicial)) {
-                if (!isNaN(volumen)) {
+            if (volumenInicial > 0) {
+                if (volumen > 0) {
                     unidades = (volumenInicial - volumen) / volumenFinal;
                 } else {
                     unidades = volumenInicial / volumenFinal;
                 }
-            } else if (!isNaN(volumen)) {
+            } else if (volumen > 0) {
                 unidades = volumen / volumenFinal;
             }
 
-            document.getElementById("unidades").value = unidades.toFixed(2);
-        };
-
-        // Escuchar cambios en los campos de volumen
-        document.getElementById("volumenInicial").addEventListener("input", calcularUnidades);
-        document.getElementById("volumen").addEventListener("input", calcularUnidades);
-
-        // Animación de burbujas mejorada
-        function createBubbles() {
-            const bubbleContainer = document.querySelector(".bubbles");
-            const bubble = document.createElement("div");
-            bubble.classList.add("bubble");
-            bubble.style.left = Math.random() * 100 + "vw";
-            bubble.style.width = Math.random() * 20 + 10 + "px";
-            bubble.style.height = bubble.style.width;
-            bubble.style.animationDuration = Math.random() * 3 + 2 + "s";
-            bubble.style.opacity = Math.random() * 0.5 + 0.3;
-            bubbleContainer.appendChild(bubble);
-            setTimeout(() => bubble.remove(), 5000);
+            unidadesResult.textContent = unidades.toFixed(2);
         }
-        setInterval(createBubbles, 300); // Generar burbujas más frecuentemente
+
+        // Crear burbujas decorativas
+        function crearBurbujas() {
+            const bubbleCount = window.innerWidth < 768 ? 8 : 12;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                let bubble = document.createElement("div");
+                bubble.classList.add("bubble");
+                
+                const size = Math.random() * 60 + 30;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.top = `${Math.random() * 100}vh`;
+                bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubble.style.opacity = Math.random() * 0.2 + 0.1;
+                
+                document.body.appendChild(bubble);
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            crearBurbujas();
+        });
+
+        // Manejar redimensionamiento
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.bubble').forEach(el => el.remove());
+            crearBurbujas();
+        });
     </script>
 </body>
 </html>

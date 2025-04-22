@@ -1,48 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú Principal Administrador</title>
+    <title>Administrador</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="2.png">
     <link rel="apple-touch-icon" sizes="180x180" href="image.png">
     <link rel="manifest" href="manifest.json">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
+        :root {
+            --primary-color: #d62828;
+            --secondary-color: #f77f00;
+            --accent-color: #fcbf49;
+            --dark-color: #003049;
+            --light-color: #eae2b7;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: darkred;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark-color), var(--primary-color));
+            color: white;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            /* overflow: hidden; Eliminado para permitir el desplazamiento */
+            overflow-x: hidden;
         }
 
         header {
             position: relative;
             text-align: center;
-            padding: 1rem;
-            background-color: darkred;
-            color: white;
-            z-index: 1; /* Asegura que el header esté sobre las burbujas */
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(to right, var(--light-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .logout-button {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: white;
-            color: darkred;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: linear-gradient(to right, var(--accent-color), var(--secondary-color));
+            color: var(--dark-color);
             border: none;
-            padding: 10px 15px;
+            padding: 0.8rem 1.5rem;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 50px;
             font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
         }
 
         .logout-button:hover {
-            background-color: lightgray;
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
         }
 
         main {
@@ -50,37 +94,56 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 1rem;
-            z-index: 1; /* Asegura que el contenido principal esté sobre las burbujas */
-        }
-
-        .box {
-            background-color: rgba(0, 0, 0, 0.5);
             padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .menu-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
             text-align: center;
-            max-width: 400px;
-            width: 100%;
-            color: white;
-        }
-
-        .box button {
-            display: block;
-            width: 100%;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            background-color: darkred;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
-            transition: background-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 150px;
         }
 
-        .box button:hover {
-            background-color: red;
+        .menu-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .menu-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-description {
+            font-size: 0.85rem;
+            opacity: 0.8;
         }
 
         #loadingScreen {
@@ -90,177 +153,292 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             color: white;
-            font-size: 2rem;
-            z-index: 2; /* Asegura que el loading esté sobre todo */
+            font-size: 1.5rem;
+            z-index: 100;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         footer {
             text-align: center;
-            padding: 1rem;
-            background-color: darkred;
-            color: white;
-            z-index: 1; /* Asegura que el footer esté sobre las burbujas */
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+            z-index: 1;
         }
 
-        /* Animación de burbujas */
-        .bubbles {
+        /* Animaciones de fondo */
+        .bg-animation {
             position: fixed;
-            width: 100%;
-            height: 100%;
             top: 0;
             left: 0;
-            z-index: 0; /* Las burbujas están detrás del contenido */
-            overflow: hidden; /* Evita que las burbujas causen desplazamiento */
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
         }
 
-        .bubble {
+        .circle {
             position: absolute;
-            bottom: -100px;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
-            animation: rise 10s infinite ease-in;
+            background: rgba(255, 255, 255, 0.05);
+            animation: float 15s infinite ease-in-out;
         }
 
-        .bubble:nth-child(1) {
-            width: 40px;
-            height: 40px;
+        .circle:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
             left: 10%;
-            animation-duration: 8s;
-        }
-
-        .bubble:nth-child(2) {
-            width: 20px;
-            height: 20px;
-            left: 20%;
-            animation-duration: 5s;
-            animation-delay: 1s;
-        }
-
-        .bubble:nth-child(3) {
-            width: 50px;
-            height: 50px;
-            left: 35%;
-            animation-duration: 7s;
-            animation-delay: 2s;
-        }
-
-        .bubble:nth-child(4) {
-            width: 80px;
-            height: 80px;
-            left: 50%;
-            animation-duration: 11s;
             animation-delay: 0s;
         }
 
-        .bubble:nth-child(5) {
-            width: 35px;
-            height: 35px;
-            left: 55%;
-            animation-duration: 6s;
-            animation-delay: 1s;
-        }
-
-        .bubble:nth-child(6) {
-            width: 45px;
-            height: 45px;
-            left: 65%;
-            animation-duration: 8s;
-            animation-delay: 3s;
-        }
-
-        .bubble:nth-child(7) {
-            width: 25px;
-            height: 25px;
-            left: 75%;
-            animation-duration: 7s;
-            animation-delay: 2s;
-        }
-
-        .bubble:nth-child(8) {
-            width: 80px;
-            height: 80px;
+        .circle:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 20%;
             left: 80%;
-            animation-duration: 12s;
-            animation-delay: 1s;
+            animation-delay: 2s;
         }
 
-        .bubble:nth-child(9) {
-            width: 15px;
-            height: 15px;
-            left: 70%;
-            animation-duration: 6s;
-            animation-delay: 0s;
-        }
-
-        .bubble:nth-child(10) {
-            width: 50px;
-            height: 50px;
-            left: 85%;
-            animation-duration: 9s;
+        .circle:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            top: 60%;
+            left: 15%;
             animation-delay: 4s;
         }
 
-        @keyframes rise {
-            0% {
-                bottom: -100px;
-                transform: translateX(0);
+        .circle:nth-child(4) {
+            width: 80px;
+            height: 80px;
+            top: 70%;
+            left: 70%;
+            animation-delay: 6s;
+        }
+
+        .circle:nth-child(5) {
+            width: 120px;
+            height: 120px;
+            top: 30%;
+            left: 50%;
+            animation-delay: 8s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-50px) translateX(50px) rotate(10deg);
             }
             50% {
-                transform: translateX(100px);
+                transform: translateY(50px) translateX(-50px) rotate(-10deg);
+            }
+            75% {
+                transform: translateY(-30px) translateX(-30px) rotate(5deg);
+            }
+        }
+
+        /* Efecto de partículas */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: particle-float 15s infinite linear;
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
             }
             100% {
-                bottom: 1080px;
-                transform: translateX(-200px);
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .menu-container {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                padding-right: 120px;
+            }
+            
+            .logout-button {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .menu-container {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                padding: 1rem;
+            }
+            
+            .logout-button {
+                margin-left: auto;
+            }
+            
+            .header-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Animación de burbujas -->
-    <div class="bubbles">
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
+    <!-- Animación de fondo -->
+    <div class="bg-animation">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
     </div>
+    
+    <!-- Partículas -->
+    <div class="particles" id="particles"></div>
 
     <header>
-        <button class="logout-button" onclick="logout()">Cerrar Sesión</button>
+        <div class="header-content">
+            <h1>Administrador</h1>
+            <button class="logout-button" onclick="logout()" title="Cerrar sesión">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
     </header>
+    
     <main>
-        <div class="box">
-            <button onclick="redirectWithLoading('js.html')">Ajuste Jarabe Simple</button>
-            <button onclick="redirectWithLoading('volfinal.html')">Calcular Volumen</button>
-            <button onclick="redirectWithLoading('ajuste.html')">Ajuste Final</button>
-            <button onclick="redirectWithLoading('horasauto.html')">Llenar reporte</button>
-            <button onclick="redirectWithLoading('unidades.html')">Calcular Unidades</button>
-            <button onclick="redirectWithLoading('brix.html')">Consultar Brix</button>
-            <button onclick="redirectWithLoading('registro.html')">Registrar JT</button>
-            <button onclick="redirectWithLoading('registrar.html')">Registrar JS</button>
-            <button onclick="redirectWithLoading('datos.html')">Consultar JT</button>
-            <button onclick="redirectWithLoading('consultarjs.html')">Consultar JS</button>
-            <button onclick="redirectWithLoading('registrar u.html')">Registrar Usuarios</button>
-            <button onclick="redirectWithLoading('consultar.html')">Consultar Usuarios</button>
-            <!-- Resto de tus botones... -->
+        <div class="menu-container">
+            <div class="menu-card" onclick="redirectWithLoading('js.html')">
+                <div class="menu-icon"><i class="fas fa-flask"></i></div>
+                <div class="menu-title">Ajuste Jarabe Simple</div>
+                <div class="menu-description">Ajustar Jara Simple según el brix.</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('volfinal.html')">
+                <div class="menu-icon"><i class="fas fa-calculator"></i></div>
+                <div class="menu-title">Calcular Volumen</div>
+                <div class="menu-description">Calcular volumen de agua a dosificar del tanque, una vez purgado el tanque.</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('ajuste.html')">
+                <div class="menu-icon"><i class="fas fa-sliders-h"></i></div>
+                <div class="menu-title">Ajuste Final</div>
+                <div class="menu-description">Ajuste Final del tanque.</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('horasauto.html')">
+                <div class="menu-icon"><i class="fas fa-clipboard-list"></i></div>
+                <div class="menu-title">Llenar reporte</div>
+                <div class="menu-description">LLenar el reporte de producción.</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('unidades.html')">
+                <div class="menu-icon"><i class="fas fa-boxes"></i></div>
+                <div class="menu-title">Calcular Unidades</div>
+                <div class="menu-description">Calcular unidades de preparaciones.</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('brix.html')">
+                <div class="menu-icon"><i class="fas fa-wine-bottle"></i></div>
+                <div class="menu-title">Consultar Brix</div>
+                <div class="menu-description">Brix Final de cada bebida.</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('registro.html')">
+                <div class="menu-icon"><i class="fas fa-file-signature"></i></div>
+                <div class="menu-title">Registrar JT</div>
+                <div class="menu-description">Nuevo jarabe terminado</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('registrar.html')">
+                <div class="menu-icon"><i class="fas fa-file-medical"></i></div>
+                <div class="menu-title">Registrar JS</div>
+                <div class="menu-description">Nuevo jarabe simple</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('datos.html')">
+                <div class="menu-icon"><i class="fas fa-search"></i></div>
+                <div class="menu-title">Consultar JT</div>
+                <div class="menu-description">Jarabe Terminado Registrados.</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('consultarjs.html')">
+                <div class="menu-icon"><i class="fas fa-search"></i></div>
+                <div class="menu-title">Consultar JS</div>
+                <div class="menu-description">Registros de jarabes Simple.</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('registrar u.html')">
+                <div class="menu-icon"><i class="fas fa-user-plus"></i></div>
+                <div class="menu-title">Registrar Usuarios</div>
+                <div class="menu-description">Usuarios Nuevos</div>
+            </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('consultar.html')">
+                <div class="menu-icon"><i class="fas fa-users-cog"></i></div>
+                <div class="menu-title">Consultar Usuarios</div>
+                <div class="menu-description">Registros de usuarios</div>
+            </div>
         </div>
     </main>
+    
     <footer>
         <p>Para Jarabe Terminado. Planta Nixapa.</p>
     </footer>
 
-    <div id="loadingScreen">Cargando...</div>
+    <div id="loadingScreen">
+        <div class="spinner"></div>
+        <div>Cargando...</div>
+    </div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -281,12 +459,59 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
+        // Crear partículas
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Posición aleatoria
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Tamaño aleatorio
+                const size = Math.random() * 3 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Opacidad aleatoria
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                
+                // Duración de animación aleatoria
+                const duration = Math.random() * 10 + 10;
+                particle.style.animationDuration = `${duration}s`;
+                
+                // Retraso aleatorio
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
+            createParticles();
+            
             // Verificar autenticación con Firebase
             auth.onAuthStateChanged((user) => {
                 if (!user) {
                     window.location.href = "index.html";
                 }
+            });
+            
+            // Efecto de aparición suave
+            const cards = document.querySelectorAll('.menu-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 + (index * 50));
             });
         });
 

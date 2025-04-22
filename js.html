@@ -1,74 +1,186 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajuste Jarabe Simple</title>
+    <title>Ajuste de jarabe simple</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="2.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="image.png">
+    <link rel="manifest" href="manifest.json">
     <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #FFE66D;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --accent: #4ECDC4;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            background-color: #8B0000;
-            color: white;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--dark), #3a4750);
+            color: var(--light);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 10px;
-            overflow: auto;
-        }
-        .form-container {
-            background-color: rgba(178, 34, 34, 0.9);
             padding: 20px;
-            border-radius: 10px;
-            width: 75%;
-            max-width: 400px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            overflow-x: hidden;
+        }
+        
+        .form-container {
+            background: rgba(41, 47, 54, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.8s ease-out;
         }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 {
+            color: var(--secondary);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: clamp(1.5rem, 4vw, 1.75rem);
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            width: 100%;
         }
+        
         .form-group label {
             display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent);
+            font-size: clamp(0.75rem, 3vw, 0.875rem);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+        
         .form-group input {
             width: 100%;
-            padding: 10px;
+            padding: 12px 15px;
             border: none;
-            border-radius: 5px;
-            background-color: #F0FFF0;
-            box-sizing: border-box;
+            border-radius: 8px;
+            background-color: rgba(247, 255, 247, 0.1);
+            color: var(--light);
+            font-size: clamp(0.875rem, 4vw, 1rem);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        @media (max-width: 600px) {
-            body {
-                align-items: flex-start;
-                height: auto;
-            }
-            .form-container {
-                padding: 15px;
-                max-width: 100%;
-            }
+        
+        .form-group input:focus {
+            outline: none;
+            background-color: rgba(247, 255, 247, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2);
         }
-        .ghost {
+        
+        .form-group input:disabled {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--secondary);
+            font-weight: 600;
+            cursor: not-allowed;
+        }
+        
+        .result-box {
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 25px;
+            border: 1px solid var(--accent);
+            text-align: center;
+        }
+        
+        .result-label {
+            font-size: clamp(0.875rem, 4vw, 1rem);
+            color: var(--accent);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .result-value {
+            font-size: clamp(1.25rem, 5vw, 1.5rem);
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .bubble {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 107, 107, 0.15);
             border-radius: 50%;
-            animation: float 5s infinite ease-in-out;
+            animation: float 8s infinite ease-in-out;
+            z-index: -1;
         }
+        
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 20px 15px;
+            }
+            
+            .form-group input {
+                padding: 10px 12px;
+            }
         }
     </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Calcular Jarabe Simple</h2>
+        <div class="form-group">
+            <label for="sabor">Sabor:</label>
+            <input type="text" id="sabor" oninput="actualizarFormulario()" placeholder="Ej: CC">
+        </div>
+        <div class="form-group">
+            <label for="nombre-completo"></label>
+            <input type="text" id="nombre-completo" disabled>
+        </div>
+        <div class="form-group">
+            <label for="brix-js">Brix del Jarabe Simple:</label>
+            <input type="number" id="brix-js" oninput="actualizarFormulario()" placeholder="Ej: 61.00" min="0">
+        </div>
+        <div class="form-group">
+            <label for="unidades">Unidades a Producir:</label>
+            <input type="number" id="unidades" oninput="actualizarFormulario()" placeholder="Ej: 48" min="0">
+        </div>
+        
+        <div class="result-box">
+            <div class="result-label">Jarabe Simple necesario:</div>
+            <div class="result-value" id="volumen">-</div>
+        </div>
+    </div>
+    
     <script>
+        // Configuración Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDVHMl5IzVCv11dKOjMlKIIOMnbBp5eHXE",
             authDomain: "almacenar-de263.firebaseapp.com",
@@ -78,81 +190,87 @@
             appId: "1:195901454057:web:84f0b639145157ee216278"
         };
 
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Función principal de cálculo
         async function actualizarFormulario() {
             const saborInput = document.getElementById('sabor').value.trim().toLowerCase();
             const brixJs = parseFloat(document.getElementById('brix-js').value) || 0;
             const unidades = parseInt(document.getElementById('unidades').value) || 0;
-            const volumenReal = parseFloat(document.getElementById('volumen-real').value) || 0;
+            
+            // Validación básica
+            if (!saborInput || isNaN(brixJs) || isNaN(unidades)) {
+                document.getElementById('nombre-completo').value = "";
+                document.getElementById('volumen').textContent = "-";
+                return;
+            }
             
             try {
                 const snapshot = await db.collection("jarabesimple").where("id", "==", saborInput).get();
+                
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data();
-                    document.getElementById('nombre-completo').value = data.nombre;
-                    const kgAzUnidad = data.kgAz;
-
-                    const densidad = Math.pow(brixJs, 2) * 1.96258e-5 + (0.003519623 * brixJs) + 1.003606866;
-                    const bD = (brixJs / 100) * densidad;
-                    const volumenJsUnidad = kgAzUnidad / bD;
-                    const volumenJs = volumenJsUnidad * unidades;
+                    document.getElementById('nombre-completo').value = data.nombre || "Nombre no disponible";
                     
-                    document.getElementById('volumen').value = volumenJs ? Math.round(volumenJs) : "";
-                    document.getElementById('litros-faltantes').value = volumenJs ? Math.round(volumenJs - volumenReal) : "";
+                    if (data.kgAz && brixJs > 0 && unidades > 0) {
+                        const kgAzUnidad = data.kgAz;
+                        
+                        // Cálculo de densidad y volumen
+                        const densidad = Math.pow(brixJs, 2) * 1.96258e-5 + (0.003519623 * brixJs) + 1.003606866;
+                        const bD = (brixJs / 100) * densidad;
+                        const volumenJsUnidad = kgAzUnidad / bD;
+                        const volumenJs = volumenJsUnidad * unidades;
+                        
+                        document.getElementById('volumen').textContent = Math.round(volumenJs) + " litros";
+                    } else {
+                        document.getElementById('volumen').textContent = "Complete todos los campos";
+                    }
                 } else {
-                    document.getElementById('nombre-completo').value = "No encontrado";
-                    document.getElementById('volumen').value = "";
-                    document.getElementById('litros-faltantes').value = "";
+                    document.getElementById('nombre-completo').value = "Sabor no encontrado";
+                    document.getElementById('volumen').textContent = "-";
                 }
             } catch (error) {
                 console.error("Error obteniendo datos: ", error);
+                document.getElementById('volumen').textContent = "Error en cálculo";
             }
         }
-    </script>
-</head>
-<body>
-    <div class="form-container">
-        <h2>Ajuste Jarabe Simple</h2>
-        <div class="form-group">
-            <label for="sabor">Sabor:</label>
-            <input type="text" id="sabor" oninput="actualizarFormulario()" placeholder="Ingrese el sabor">
-        </div>
-        <div class="form-group">
-            <label for="nombre-completo"></label>
-            <input type="text" id="nombre-completo" disabled>
-        </div>
-        <div class="form-group">
-            <label for="brix-js">Brix JS:</label>
-            <input type="number" id="brix-js" oninput="actualizarFormulario()">
-        </div>
-        <div class="form-group">
-            <label for="unidades">Unidades:</label>
-            <input type="number" id="unidades" oninput="actualizarFormulario()">
-        </div>
-        <div class="form-group">
-            <label for="volumen">Jarabe Simple a utilizar:</label>
-            <input type="number" id="volumen" disabled>
-        </div>
-        <div class="form-group">
-            <label for="volumen-real">Volumen Real del Tanque:</label>
-            <input type="number" id="volumen-real" oninput="actualizarFormulario()">
-        </div>
-        <div class="form-group">
-            <label for="litros-faltantes">Litros a ajustar</label>
-            <input type="number" id="litros-faltantes" disabled>
-        </div>
-    </div>
-    <script>
-        for (let i = 0; i < 10; i++) {
-            let ghost = document.createElement("div");
-            ghost.classList.add("ghost");
-            ghost.style.left = Math.random() * 100 + "vw";
-            ghost.style.top = Math.random() * 100 + "vh";
-            ghost.style.animationDuration = Math.random() * 3 + 2 + "s";
-            document.body.appendChild(ghost);
+
+        // Crear burbujas decorativas
+        function crearBurbujas() {
+            const bubbleCount = window.innerWidth < 768 ? 8 : 12;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                let bubble = document.createElement("div");
+                bubble.classList.add("bubble");
+                
+                const size = Math.random() * 60 + 30;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.top = `${Math.random() * 100}vh`;
+                bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubble.style.opacity = Math.random() * 0.2 + 0.1;
+                
+                document.body.appendChild(bubble);
+            }
         }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            crearBurbujas();
+            
+            // Forzar cálculo al cargar si hay valores
+            actualizarFormulario();
+        });
+
+        // Manejar redimensionamiento
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.bubble').forEach(el => el.remove());
+            crearBurbujas();
+        });
     </script>
 </body>
 </html>

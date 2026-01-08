@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administrador</title>
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="2.png">
     <link rel="apple-touch-icon" sizes="180x180" href="image.png">
     <link rel="manifest" href="manifest.json">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -159,7 +156,7 @@
             flex-direction: column;
             color: white;
             font-size: 1.5rem;
-            z-index: 100;
+            z-index: 1000;
         }
 
         .spinner {
@@ -185,7 +182,6 @@
             z-index: 1;
         }
 
-        /* Animaciones de fondo */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -258,7 +254,6 @@
             }
         }
 
-        /* Efecto de partículas */
         .particles {
             position: fixed;
             top: 0;
@@ -294,7 +289,101 @@
             }
         }
 
-        /* Responsive */
+        .floating-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            overflow: hidden;
+            display: none;
+            transform: translateX(100%);
+            transition: transform 0.5s ease;
+            border: 2px solid var(--accent-color);
+        }
+
+        .notification-header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            padding: 1rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-close:hover {
+            transform: scale(1.2);
+        }
+
+        .notification-body {
+            padding: 1.5rem;
+            color: var(--dark-color);
+        }
+
+        .notification-content {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .notification-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .notification-btn {
+            flex: 1;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .notification-btn-accept {
+            background: linear-gradient(to right, var(--accent-color), var(--secondary-color));
+            color: var(--dark-color);
+        }
+
+        .notification-btn-hide {
+            background: linear-gradient(to right, #6c757d, #495057);
+            color: white;
+        }
+
+        .notification-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
         @media (max-width: 768px) {
             .menu-container {
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -309,6 +398,12 @@
                 padding: 0.6rem 1rem;
                 font-size: 0.9rem;
                 right: 10px;
+            }
+            
+            .floating-notification {
+                width: 300px;
+                right: 10px;
+                bottom: 10px;
             }
         }
 
@@ -330,11 +425,16 @@
                 flex-direction: column;
                 align-items: center;
             }
+            
+            .floating-notification {
+                width: 280px;
+                right: 10px;
+                bottom: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Animación de fondo -->
     <div class="bg-animation">
         <div class="circle"></div>
         <div class="circle"></div>
@@ -343,8 +443,30 @@
         <div class="circle"></div>
     </div>
     
-    <!-- Partículas -->
     <div class="particles" id="particles"></div>
+
+    <div class="floating-notification" id="floatingNotification">
+        <div class="notification-header">
+            <div class="notification-title">
+                <i class="fas fa-bullhorn"></i>
+                Nuevo Anuncio
+            </div>
+            <button class="notification-close" id="notificationClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notification-body">
+            <div class="notification-content" id="notificationContent"></div>
+            <div class="notification-actions">
+                <button class="notification-btn notification-btn-accept" id="notificationAccept">
+                    <i class="fas fa-check"></i> Aceptar
+                </button>
+                <button class="notification-btn notification-btn-hide" id="notificationHide">
+                    <i class="fas fa-eye-slash"></i> Ya no mostrar más
+                </button>
+            </div>
+        </div>
+    </div>
 
     <header>
         <div class="header-content">
@@ -428,6 +550,12 @@
                 <div class="menu-title">Consultar Usuarios</div>
                 <div class="menu-description">Registros de usuarios</div>
             </div>
+            
+            <div class="menu-card" onclick="redirectWithLoading('anuncios.html')">
+                <div class="menu-icon"><i class="fas fa-bullhorn"></i></div>
+                <div class="menu-title">Anuncios</div>
+                <div class="menu-description">Crear y gestionar anuncios</div>
+            </div>
         </div>
     </main>
     
@@ -440,12 +568,11 @@
         <div>Cargando...</div>
     </div>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // Configuración de Firebase (DEBE SER IDÉNTICA A LA DE INDEX.HTML)
         const firebaseConfig = {
             apiKey: "AIzaSyDxV9tCHCPocCuacKYmZMAAaYJAoG5xoOA",
             authDomain: "jarabe-34dd4.firebaseapp.com",
@@ -455,11 +582,15 @@
             appId: "1:641991757108:web:bdb5a4a5cacd858f55e961",
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        // Crear partículas
+        let anunciosListener = null;
+        let ultimoAnuncioId = localStorage.getItem('ultimoAnuncioVisto') || '';
+        let anunciosOcultos = JSON.parse(localStorage.getItem('anunciosOcultos') || '{}');
+        let notificacionMostrada = false;
+
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
             const particleCount = 50;
@@ -468,40 +599,169 @@
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
                 
-                // Posición aleatoria
                 particle.style.left = `${Math.random() * 100}%`;
                 particle.style.top = `${Math.random() * 100}%`;
                 
-                // Tamaño aleatorio
                 const size = Math.random() * 3 + 1;
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
                 
-                // Opacidad aleatoria
                 particle.style.opacity = Math.random() * 0.5 + 0.1;
                 
-                // Duración de animación aleatoria
                 const duration = Math.random() * 10 + 10;
                 particle.style.animationDuration = `${duration}s`;
                 
-                // Retraso aleatorio
                 particle.style.animationDelay = `${Math.random() * 5}s`;
                 
                 particlesContainer.appendChild(particle);
             }
         }
 
+        function mostrarNotificacion(anuncio) {
+            if (notificacionMostrada) return;
+            
+            const notification = document.getElementById('floatingNotification');
+            const content = document.getElementById('notificationContent');
+            
+            content.innerHTML = `
+                <div style="margin-bottom: 15px; padding: 10px; border-radius: 8px; background-color: ${anuncio.backgroundColor}">
+                    <h3 style="color: ${anuncio.color}; font-family: ${anuncio.fontFamily}; font-size: ${anuncio.fontSize}; margin-bottom: 10px;">
+                        ${anuncio.titulo}
+                    </h3>
+                    <p style="color: ${anuncio.color}; font-family: ${anuncio.fontFamily}; font-size: calc(${anuncio.fontSize} - 2px); line-height: 1.4;">
+                        ${anuncio.contenido.replace(/\n/g, '<br>')}
+                    </p>
+                </div>
+            `;
+            
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            notificacionMostrada = true;
+            
+            document.getElementById('notificationAccept').onclick = function() {
+                aceptarAnuncio(anuncio.id);
+            };
+            
+            document.getElementById('notificationHide').onclick = function() {
+                ocultarAnuncio(anuncio.id);
+            };
+        }
+
+        function cerrarNotificacion() {
+            const notification = document.getElementById('floatingNotification');
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 500);
+        }
+
+        function aceptarAnuncio(anuncioId) {
+            ultimoAnuncioId = anuncioId;
+            localStorage.setItem('ultimoAnuncioVisto', anuncioId);
+            cerrarNotificacion();
+        }
+
+        function ocultarAnuncio(anuncioId) {
+            anunciosOcultos[anuncioId] = true;
+            localStorage.setItem('anunciosOcultos', JSON.stringify(anunciosOcultos));
+            ultimoAnuncioId = anuncioId;
+            localStorage.setItem('ultimoAnuncioVisto', anuncioId);
+            cerrarNotificacion();
+        }
+
+        function escucharNuevosAnuncios() {
+            if (anunciosListener) {
+                anunciosListener();
+            }
+            
+            anunciosListener = db.collection("anuncios")
+                .orderBy("fechaCreacion", "desc")
+                .limit(1)
+                .onSnapshot((snapshot) => {
+                    if (!snapshot.empty) {
+                        const doc = snapshot.docs[0];
+                        const anuncio = doc.data();
+                        const anuncioId = doc.id;
+                        
+                        anuncio.id = anuncioId;
+                        
+                        console.log("Anuncio detectado:", anuncio);
+                        console.log("Último anuncio visto:", ultimoAnuncioId);
+                        console.log("¿Está oculto?", anunciosOcultos[anuncioId]);
+                        
+                        if (anuncioId !== ultimoAnuncioId && !anunciosOcultos[anuncioId]) {
+                            console.log("Mostrando notificación para anuncio:", anuncioId);
+                            
+                            const ahora = new Date();
+                            const fechaCreacion = anuncio.fechaCreacion ? anuncio.fechaCreacion.toDate() : ahora;
+                            const diferenciaHoras = (ahora - fechaCreacion) / (1000 * 60 * 60);
+                            
+                            if (diferenciaHoras <= 168) {
+                                setTimeout(() => {
+                                    mostrarNotificacion(anuncio);
+                                }, 3000);
+                            }
+                        }
+                    } else {
+                        console.log("No hay anuncios en la base de datos");
+                    }
+                }, (error) => {
+                    console.error("Error escuchando anuncios:", error);
+                });
+        }
+
+        function verificarAnunciosExistentes() {
+            db.collection("anuncios")
+                .orderBy("fechaCreacion", "desc")
+                .limit(1)
+                .get()
+                .then((snapshot) => {
+                    if (!snapshot.empty) {
+                        const doc = snapshot.docs[0];
+                        const anuncio = doc.data();
+                        const anuncioId = doc.id;
+                        
+                        anuncio.id = anuncioId;
+                        
+                        if (anuncioId !== ultimoAnuncioId && !anunciosOcultos[anuncioId]) {
+                            const ahora = new Date();
+                            const fechaCreacion = anuncio.fechaCreacion ? anuncio.fechaCreacion.toDate() : ahora;
+                            const diferenciaHoras = (ahora - fechaCreacion) / (1000 * 60 * 60);
+                            
+                            if (diferenciaHoras <= 168) {
+                                setTimeout(() => {
+                                    mostrarNotificacion(anuncio);
+                                }, 3000);
+                            }
+                        }
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error verificando anuncios:", error);
+                });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             createParticles();
             
-            // Verificar autenticación con Firebase
+            const notificationClose = document.getElementById('notificationClose');
+            if (notificationClose) {
+                notificationClose.onclick = cerrarNotificacion;
+            }
+            
             auth.onAuthStateChanged((user) => {
                 if (!user) {
                     window.location.href = "index.html";
+                } else {
+                    console.log("Usuario autenticado, escuchando anuncios...");
+                    verificarAnunciosExistentes();
+                    escucharNuevosAnuncios();
                 }
             });
             
-            // Efecto de aparición suave
             const cards = document.querySelectorAll('.menu-card');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
@@ -531,15 +791,16 @@
         }
 
         function logout() {
-            // Mostrar pantalla de carga
+            if (anunciosListener) {
+                anunciosListener();
+                anunciosListener = null;
+            }
+            
             showLoadingScreen(() => {
-                // Cerrar sesión en Firebase y luego redirigir
                 auth.signOut()
                     .then(() => {
-                        // Limpiar credenciales locales
                         localStorage.removeItem("username");
                         localStorage.removeItem("password");
-                        // Redirigir con parámetro para evitar bucle
                         window.location.href = "index.html?logout=true";
                     })
                     .catch((error) => {
@@ -548,6 +809,11 @@
                     });
             });
         }
+
+        window.mostrarNotificacion = mostrarNotificacion;
+        window.cerrarNotificacion = cerrarNotificacion;
+        window.aceptarAnuncio = aceptarAnuncio;
+        window.ocultarAnuncio = ocultarAnuncio;
     </script>
 </body>
 </html>

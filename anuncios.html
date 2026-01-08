@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Anuncios</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="2.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="image.png">
+    <style>
+        :root {
+            --primary: #4ECDC4;
+            --secondary: #FFE66D;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --accent: #FF6B6B;
+            --bg-gradient: linear-gradient(135deg, var(--dark), #3a4750);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            background-attachment: fixed;
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .form-container {
+            background: rgba(41, 47, 54, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .anuncios-container {
+            background: rgba(41, 47, 54, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: var(--secondary);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: clamp(1.5rem, 4vw, 1.75rem);
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: clamp(0.75rem, 3vw, 0.875rem);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(247, 255, 247, 0.1);
+            color: var(--light);
+            font-size: clamp(0.875rem, 4vw, 1rem);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            background-color: rgba(247, 255, 247, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .style-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .color-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+        
+        .preview-section {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            min-height: 150px;
+            transition: all 0.3s ease;
+        }
+        
+        .preview-title {
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .preview-content {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--dark);
+        }
+        
+        .btn-primary:hover {
+            background-color: #3db8af;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background-color: var(--accent);
+            color: var(--light);
+        }
+        
+        .btn-danger:hover {
+            background-color: #e55a5a;
+            transform: translateY(-2px);
+        }
+        
+        .result-box {
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 25px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            display: none;
+        }
+        
+        .result-label {
+            font-size: clamp(0.875rem, 4vw, 1rem);
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .result-value {
+            font-size: clamp(1rem, 5vw, 1.25rem);
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .anuncios-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .anuncio-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .anuncio-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .anuncio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .anuncio-titulo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin: 0;
+        }
+        
+        .anuncio-fecha {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .anuncio-contenido {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .anuncio-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-action {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-edit {
+            background-color: rgba(78, 205, 196, 0.2);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-edit:hover {
+            background-color: rgba(78, 205, 196, 0.3);
+        }
+        
+        .btn-delete {
+            background-color: rgba(255, 107, 107, 0.2);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+        
+        .btn-delete:hover {
+            background-color: rgba(255, 107, 107, 0.3);
+        }
+        
+        .confirm-delete {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .confirm-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .confirm-yes {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .confirm-no {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .bubble {
+            position: fixed;
+            background: rgba(255, 230, 109, 0.1);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+            z-index: -1;
+            box-shadow: 0 0 20px rgba(255, 230, 109, 0.2);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        .star {
+            position: fixed;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1px;
+            animation: twinkle 5s infinite ease-in-out;
+            z-index: -1;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .style-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .anuncios-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .form-container, .anuncios-container {
+                padding: 20px 15px;
+            }
+            
+            .form-group input, .form-group textarea, .form-group select {
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Editor de Anuncios</h1>
+            
+            <div class="form-group">
+                <label for="titulo">Título del anuncio:</label>
+                <input type="text" id="titulo" placeholder="Ej: Oferta especial">
+            </div>
+            
+            <div class="form-group">
+                <label for="contenido">Contenido del anuncio:</label>
+                <textarea id="contenido" placeholder="Escribe aquí el contenido de tu anuncio..."></textarea>
+            </div>
+            
+            <div class="style-controls">
+                <div class="form-group">
+                    <label for="fontFamily">Tipo de letra:</label>
+                    <select id="fontFamily">
+                        <option value="'Poppins', sans-serif">Poppins</option>
+                        <option value="'Arial', sans-serif">Arial</option>
+                        <option value="'Georgia', serif">Georgia</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="'Comic Sans MS', cursive">Comic Sans</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fontSize">Tamaño de letra:</label>
+                    <select id="fontSize">
+                        <option value="14px">Pequeño</option>
+                        <option value="16px" selected>Mediano</option>
+                        <option value="18px">Grande</option>
+                        <option value="20px">Muy grande</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="style-controls">
+                <div class="form-group">
+                    <label for="color">Color de letra:</label>
+                    <div class="color-preview">
+                        <input type="color" id="color" value="#ffffff" style="display: none;">
+                        <div class="color-box" id="colorPreview" style="background-color: #ffffff;"></div>
+                        <span id="colorValue">#FFFFFF</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="bgColor">Color de fondo:</label>
+                    <div class="color-preview">
+                        <input type="color" id="bgColor" value="#4e4e4e" style="display: none;">
+                        <div class="color-box" id="bgColorPreview" style="background-color: #4e4e4e;"></div>
+                        <span id="bgColorValue">#4E4E4E</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <div class="preview-title">Vista previa del anuncio:</div>
+                <div class="preview-content" id="anuncioPreview">
+                    Tu anuncio aparecerá aquí...
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-secondary" id="btnPreview">
+                    <i class="fas fa-eye"></i> Actualizar Vista Previa
+                </button>
+                <button class="btn btn-primary" id="btnGuardar">
+                    <i class="fas fa-save"></i> Guardar Anuncio
+                </button>
+                <button class="btn btn-danger" id="btnCancelar" style="display: none;">
+                    <i class="fas fa-times"></i> Cancelar Edición
+                </button>
+            </div>
+            
+            <div class="result-box" id="resultBox">
+                <div class="result-label">Estado:</div>
+                <div class="result-value" id="resultValue">-</div>
+            </div>
+        </div>
+        
+        <div class="anuncios-container">
+            <h2>Anuncios Guardados</h2>
+            <div class="anuncios-list" id="anunciosList">
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-bullhorn"></i>
+                    <p>No hay anuncios guardados todavía.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxV9tCHCPocCuacKYmZMAAaYJAoG5xoOA",
+            authDomain: "jarabe-34dd4.firebaseapp.com",
+            projectId: "jarabe-34dd4",
+            storageBucket: "jarabe-34dd4.firebasestorage.app",
+            messagingSenderId: "641991757108",
+            appId: "1:641991757108:web:bdb5a4a5cacd858f55e961",
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let anuncioEditandoId = null;
+        let anunciosListener = null;
+        let eliminandoId = null;
+
+        const tituloInput = document.getElementById('titulo');
+        const contenidoInput = document.getElementById('contenido');
+        const fontFamilySelect = document.getElementById('fontFamily');
+        const fontSizeSelect = document.getElementById('fontSize');
+        const colorInput = document.getElementById('color');
+        const colorPreview = document.getElementById('colorPreview');
+        const colorValue = document.getElementById('colorValue');
+        const bgColorInput = document.getElementById('bgColor');
+        const bgColorPreview = document.getElementById('bgColorPreview');
+        const bgColorValue = document.getElementById('bgColorValue');
+        const anuncioPreview = document.getElementById('anuncioPreview');
+        const btnPreview = document.getElementById('btnPreview');
+        const btnGuardar = document.getElementById('btnGuardar');
+        const btnCancelar = document.getElementById('btnCancelar');
+        const resultBox = document.getElementById('resultBox');
+        const resultValue = document.getElementById('resultValue');
+        const anunciosList = document.getElementById('anunciosList');
+        const emptyState = document.getElementById('emptyState');
+
+        colorPreview.addEventListener('click', () => colorInput.click());
+        bgColorPreview.addEventListener('click', () => bgColorInput.click());
+
+        colorInput.addEventListener('input', function() {
+            colorPreview.style.backgroundColor = this.value;
+            colorValue.textContent = this.value.toUpperCase();
+            actualizarVistaPrevia();
+        });
+
+        bgColorInput.addEventListener('input', function() {
+            bgColorPreview.style.backgroundColor = this.value;
+            bgColorValue.textContent = this.value.toUpperCase();
+            actualizarVistaPrevia();
+        });
+
+        tituloInput.addEventListener('input', actualizarVistaPrevia);
+        contenidoInput.addEventListener('input', actualizarVistaPrevia);
+        fontFamilySelect.addEventListener('change', actualizarVistaPrevia);
+        fontSizeSelect.addEventListener('change', actualizarVistaPrevia);
+
+        function actualizarVistaPrevia() {
+            const titulo = tituloInput.value || "Título de ejemplo";
+            const contenido = contenidoInput.value || "Contenido de ejemplo...";
+            
+            anuncioPreview.innerHTML = `<strong>${titulo}</strong><br>${contenido.replace(/\n/g, '<br>')}`;
+            anuncioPreview.style.fontFamily = fontFamilySelect.value;
+            anuncioPreview.style.fontSize = fontSizeSelect.value;
+            anuncioPreview.style.color = colorInput.value;
+            anuncioPreview.style.backgroundColor = bgColorInput.value;
+            anuncioPreview.style.padding = "15px";
+            anuncioPreview.style.borderRadius = "8px";
+            anuncioPreview.style.minHeight = "50px";
+        }
+
+        btnPreview.addEventListener('click', actualizarVistaPrevia);
+
+        btnGuardar.addEventListener('click', async function() {
+            const titulo = tituloInput.value.trim();
+            const contenido = contenidoInput.value.trim();
+            
+            if (!titulo || !contenido) {
+                mostrarResultado("Por favor completa todos los campos", "error");
+                return;
+            }
+            
+            const anuncio = {
+                titulo: titulo,
+                contenido: contenido,
+                fontFamily: fontFamilySelect.value,
+                fontSize: fontSizeSelect.value,
+                color: colorInput.value,
+                backgroundColor: bgColorInput.value,
+                fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
+                fechaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            try {
+                btnGuardar.disabled = true;
+                
+                if (anuncioEditandoId) {
+                    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
+                    await db.collection("anuncios").doc(anuncioEditandoId).update(anuncio);
+                    mostrarResultado("Anuncio actualizado exitosamente", "success");
+                    cancelarEdicion();
+                } else {
+                    btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+                    await db.collection("anuncios").add(anuncio);
+                    mostrarResultado("Anuncio guardado exitosamente", "success");
+                    limpiarFormulario();
+                }
+                
+            } catch (error) {
+                console.error("Error guardando anuncio: ", error);
+                mostrarResultado("Error al guardar el anuncio", "error");
+            } finally {
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = anuncioEditandoId ? '<i class="fas fa-edit"></i> Actualizar' : '<i class="fas fa-save"></i> Guardar Anuncio';
+            }
+        });
+
+        btnCancelar.addEventListener('click', cancelarEdicion);
+
+        function limpiarFormulario() {
+            tituloInput.value = "";
+            contenidoInput.value = "";
+            fontFamilySelect.value = "'Poppins', sans-serif";
+            fontSizeSelect.value = "16px";
+            colorInput.value = "#ffffff";
+            colorPreview.style.backgroundColor = "#ffffff";
+            colorValue.textContent = "#FFFFFF";
+            bgColorInput.value = "#4e4e4e";
+            bgColorPreview.style.backgroundColor = "#4e4e4e";
+            bgColorValue.textContent = "#4E4E4E";
+            actualizarVistaPrevia();
+        }
+
+        function cancelarEdicion() {
+            anuncioEditandoId = null;
+            limpiarFormulario();
+            btnGuardar.innerHTML = '<i class="fas fa-save"></i> Guardar Anuncio';
+            btnCancelar.style.display = "none";
+            btnPreview.style.display = "flex";
+        }
+
+        function mostrarResultado(mensaje, tipo) {
+            resultValue.textContent = mensaje;
+            resultBox.style.display = "block";
+            
+            if (tipo === "success") {
+                resultBox.style.backgroundColor = "rgba(78, 205, 196, 0.2)";
+                resultBox.style.borderColor = "var(--primary)";
+                resultValue.style.color = "var(--secondary)";
+            } else {
+                resultBox.style.backgroundColor = "rgba(255, 107, 107, 0.2)";
+                resultBox.style.borderColor = "var(--accent)";
+                resultValue.style.color = "var(--accent)";
+            }
+            
+            setTimeout(() => {
+                resultBox.style.display = "none";
+            }, 5000);
+        }
+
+        function formatearFecha(timestamp) {
+            if (!timestamp) return "Fecha no disponible";
+            const fecha = timestamp.toDate();
+            return fecha.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function editarAnuncio(id, anuncio) {
+            anuncioEditandoId = id;
+            tituloInput.value = anuncio.titulo;
+            contenidoInput.value = anuncio.contenido;
+            fontFamilySelect.value = anuncio.fontFamily;
+            fontSizeSelect.value = anuncio.fontSize;
+            colorInput.value = anuncio.color;
+            colorPreview.style.backgroundColor = anuncio.color;
+            colorValue.textContent = anuncio.color.toUpperCase();
+            bgColorInput.value = anuncio.backgroundColor;
+            bgColorPreview.style.backgroundColor = anuncio.backgroundColor;
+            bgColorValue.textContent = anuncio.backgroundColor.toUpperCase();
+            
+            btnGuardar.innerHTML = '<i class="fas fa-edit"></i> Actualizar';
+            btnCancelar.style.display = "flex";
+            btnPreview.style.display = "none";
+            
+            actualizarVistaPrevia();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function eliminarAnuncio(id) {
+            if (eliminandoId === id) {
+                try {
+                    await db.collection("anuncios").doc(id).delete();
+                    mostrarResultado("Anuncio eliminado exitosamente", "success");
+                    eliminandoId = null;
+                } catch (error) {
+                    console.error("Error eliminando anuncio: ", error);
+                    mostrarResultado("Error al eliminar el anuncio", "error");
+                    eliminandoId = null;
+                }
+            } else {
+                eliminandoId = id;
+            }
+        }
+
+        function cargarAnuncios() {
+            if (anunciosListener) anunciosListener();
+            
+            anunciosListener = db.collection("anuncios")
+                .orderBy("fechaCreacion", "desc")
+                .onSnapshot((snapshot) => {
+                    if (snapshot.empty) {
+                        emptyState.style.display = "block";
+                        anunciosList.innerHTML = '';
+                        anunciosList.appendChild(emptyState);
+                        return;
+                    }
+                    
+                    emptyState.style.display = "none";
+                    anunciosList.innerHTML = '';
+                    
+                    snapshot.forEach((doc) => {
+                        const anuncio = doc.data();
+                        const id = doc.id;
+                        
+                        const card = document.createElement('div');
+                        card.className = 'anuncio-card';
+                        card.style.fontFamily = anuncio.fontFamily;
+                        card.style.color = anuncio.color;
+                        card.style.backgroundColor = anuncio.backgroundColor;
+                        card.style.fontSize = anuncio.fontSize;
+                        
+                        const estaEliminando = eliminandoId === id;
+                        
+                        card.innerHTML = `
+                            <div class="anuncio-header">
+                                <h3 class="anuncio-titulo">${anuncio.titulo}</h3>
+                                <div class="anuncio-fecha">${formatearFecha(anuncio.fechaCreacion)}</div>
+                            </div>
+                            <div class="anuncio-contenido">${anuncio.contenido.replace(/\n/g, '<br>')}</div>
+                            <div class="anuncio-actions">
+                                ${!estaEliminando ? `
+                                <button class="btn-action btn-edit" onclick="editarAnuncio('${id}', ${JSON.stringify(anuncio).replace(/'/g, "\\'")})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn-action btn-delete" onclick="eliminarAnuncio('${id}')">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                                ` : `
+                                <div style="color: var(--accent); font-size: 0.9rem; margin-bottom: 10px;">
+                                    ¿Seguro que quieres eliminar este anuncio?
+                                </div>
+                                <div class="confirm-delete">
+                                    <button class="confirm-btn confirm-yes" onclick="eliminarAnuncio('${id}')">
+                                        Sí, eliminar
+                                    </button>
+                                    <button class="confirm-btn confirm-no" onclick="cancelarEliminacion('${id}')">
+                                        Cancelar
+                                    </button>
+                                </div>
+                                `}
+                            </div>
+                        `;
+                        
+                        anunciosList.appendChild(card);
+                    });
+                }, (error) => {
+                    console.error("Error cargando anuncios: ", error);
+                    mostrarResultado("Error al cargar los anuncios", "error");
+                });
+        }
+
+        function cancelarEliminacion(id) {
+            if (eliminandoId === id) {
+                eliminandoId = null;
+                cargarAnuncios();
+            }
+        }
+
+        function crearDecoracion() {
+            const bubbleCount = window.innerWidth < 768 ? 8 : 12;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                let bubble = document.createElement("div");
+                bubble.classList.add("bubble");
+                
+                const size = Math.random() * 60 + 30;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.top = `${Math.random() * 100}vh`;
+                bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubble.style.opacity = Math.random() * 0.2 + 0.1;
+                
+                document.body.appendChild(bubble);
+            }
+            
+            const starCount = window.innerWidth < 768 ? 15 : 30;
+            
+            for (let i = 0; i < starCount; i++) {
+                let star = document.createElement("div");
+                star.classList.add("star");
+                star.innerHTML = "★";
+                
+                const size = Math.random() * 3 + 1;
+                star.style.fontSize = `${size}px`;
+                star.style.left = `${Math.random() * 100}vw`;
+                star.style.top = `${Math.random() * 100}vh`;
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                
+                document.body.appendChild(star);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            crearDecoracion();
+            actualizarVistaPrevia();
+            cargarAnuncios();
+        });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.bubble, .star').forEach(el => el.remove());
+            crearDecoracion();
+        });
+
+        window.editarAnuncio = editarAnuncio;
+        window.eliminarAnuncio = eliminarAnuncio;
+        window.cancelarEliminacion = cancelarEliminacion;
+    </script>
+</body>
+</html>
